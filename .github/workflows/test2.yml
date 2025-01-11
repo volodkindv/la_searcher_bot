@@ -5,10 +5,8 @@ env:
 on:
   push:
     paths:
-      - 'src/${{ env.FILE_NAME }}/main.py'
-      - 'src/${{ env.FILE_NAME }}/requirements.txt'
-      - '.github/workflows/deploy_${{ env.FILE_NAME }}.yml'
-      - .github/workflows/test2.yml
+      - 'src/users_activate/*'
+      # - .github/workflows/test2.yml
 
 jobs:
   test:
