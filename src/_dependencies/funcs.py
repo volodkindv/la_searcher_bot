@@ -1,5 +1,8 @@
+import os
 import urllib.request
 from functools import lru_cache
+
+import google.cloud.logging
 from google.cloud import secretmanager
 
 
@@ -25,3 +28,13 @@ def get_secrets(secret_request):
     response = get_secret_manager_client().access_secret_version(name=name)
 
     return response.payload.data.decode('UTF-8')
+
+
+def setup_google_logging():
+    logging_disabled = os.getenv('GOOGLE_LOGGING_DISABLED', False)
+    if logging_disabled:
+        # TODO pydantic-settings or improve parsing here.
+        return
+
+    log_client = google.cloud.logging.Client()
+    log_client.setup_logging()

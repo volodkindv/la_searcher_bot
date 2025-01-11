@@ -7,14 +7,12 @@ import logging
 import re
 
 import functions_framework
-import google.cloud.logging
 import psycopg2
 from bs4 import BeautifulSoup
 
-from _dependencies.funcs import get_secrets
+from _dependencies.funcs import get_secrets, setup_google_logging
 
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
+setup_google_logging()
 
 
 def sql_connect_by_psycopg2():
