@@ -1,7 +1,7 @@
 name: Deploy-GCF-Users-Activate # UPD HERE!
 env:
   FILE_NAME: users_activate # UPD HERE!
-#change to trigger pipeline
+#change to trigger pipeline 2
 on:
   push:
     branches : [main]
