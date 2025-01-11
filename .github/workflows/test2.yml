@@ -1,0 +1,22 @@
+name: Echo
+env:
+  FILE_NAME: users_activate # UPD HERE!
+
+on:
+  push:
+    branches : [main]
+    paths:
+      - 'src/${{ env.FILE_NAME }}/main.py'
+      - 'src/${{ env.FILE_NAME }}/requirements.txt'
+      - '.github/workflows/deploy_${{ env.FILE_NAME }}.yml'
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v3
+
+      - name: Echo Ok
+        run: |
+          echo OK
