@@ -295,6 +295,8 @@ def save_user_statistics_to_db(user_input, response) -> None:
 
 
 def clean_up_content(init_content):
+    from _dependencies.funcs import def1
+    def1(  )
     def cook_soup(content):
         content = BeautifulSoup(content, 'lxml')
 
