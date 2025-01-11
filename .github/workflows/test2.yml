@@ -4,7 +4,6 @@ env:
 
 on:
   push:
-    branches : [main]
     paths:
       - 'src/${{ env.FILE_NAME }}/main.py'
       - 'src/${{ env.FILE_NAME }}/requirements.txt'
