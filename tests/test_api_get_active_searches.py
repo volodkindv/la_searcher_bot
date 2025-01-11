@@ -1,10 +1,10 @@
 from datetime import datetime, timedelta
-
 import pytest
 from flask import Flask
 
 
 def test_main():
+    
     from api_get_active_searches.main import main
 
     app = Flask(__name__)
