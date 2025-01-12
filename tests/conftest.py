@@ -18,17 +18,23 @@ load_dotenv()
 
 
 @pytest.fixture(scope='session')
+def keep_db():
+    """do not recreate test db"""
+    return True
+
+
+@pytest.fixture(scope='session')
 def use_real_db():
     return True
 
 
 @pytest.fixture(scope='session', autouse=True)
-def create_test_db(use_real_db: bool):
+def create_test_db(use_real_db: bool, keep_db: bool):
     """
     Automatically recreate test database schema for using in tests
     Be careful: all data in database would be deleted!
     """
-    if not use_real_db:
+    if not use_real_db or keep_db:
         return
 
     from tests.tools import init_testing_db
