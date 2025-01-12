@@ -1,0 +1,40 @@
+from unittest.mock import MagicMock
+
+from check_topics_by_upd_time import main
+
+
+def test_check_updates_in_folder_with_folders():
+    res = main.check_updates_in_folder_with_folders(requests_session=MagicMock(), start_folder_num=MagicMock())
+    pass
+
+
+def test_get_the_list_folders_to_update():
+    res = main.get_the_list_folders_to_update(
+        list_of_folders_and_times=MagicMock(), now_time=MagicMock(), delay_time=MagicMock()
+    )
+    pass
+
+
+def test_main():
+    res = main.main(event=MagicMock(), context=MagicMock())
+    pass
+
+
+def test_notify_admin():
+    res = main.notify_admin(message=MagicMock())
+    pass
+
+
+def test_publish_to_pubsub():
+    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
+    pass
+
+
+def test_setup_google_logging():
+    res = main.setup_google_logging()
+    pass
+
+
+def test_time_delta():
+    res = main.time_delta(now=MagicMock(), time=MagicMock())
+    pass
