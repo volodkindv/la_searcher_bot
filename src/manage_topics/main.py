@@ -3,21 +3,12 @@ import datetime
 import json
 import logging
 import random
-import urllib.request
 
-import google.cloud.logging
 import sqlalchemy
-from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-publisher = pubsub_v1.PublisherClient()
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
+setup_google_logging()
 
 
 def process_pubsub_message(event):
@@ -35,48 +26,12 @@ def process_pubsub_message(event):
     return message_in_ascii
 
 
-def publish_to_pubsub(topic_name, message):
-    """publishing a new message to pub/sub"""
-
-    global project_id
-
-    topic_path = publisher.topic_path(project_id, topic_name)
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info(f'Pub/sub message published: {message}')
-
-    except Exception as e:
-        logging.error('Publishing to pub/sub failed: ' + repr(e))
-        logging.exception(e)
-
-    return None
-
-
 def notify_admin(message):
     """send the pub/sub message to Debug to Admin"""
 
     publish_to_pubsub('topic_notify_admin', message)
 
     return None
-
-
-def get_secrets(secret_request):
-    """get secret from GCP Secret Manager"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    client = secretmanager.SecretManagerServiceClient()
-
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
 
 
 def sql_connect():

@@ -9,7 +9,6 @@ import logging
 import random
 import re
 import time
-import urllib.request
 from datetime import datetime, timedelta, timezone
 
 import google.auth.transport.requests
@@ -19,20 +18,13 @@ import requests
 import sqlalchemy
 from bs4 import BeautifulSoup, SoupStrainer  # noqa
 from geopy.geocoders import Nominatim
-from google.cloud import pubsub_v1, secretmanager, storage
+from google.cloud import storage
 from yandex_geocoder import Client, exceptions
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-client = secretmanager.SecretManagerServiceClient()
+setup_google_logging()
 
-publisher = pubsub_v1.PublisherClient()
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
 
 # Sessions – to reuse for reoccurring requests
 requests_session = None
@@ -927,38 +919,6 @@ def update_coordinates(db, list_of_search_objects):
     return None
 
 
-def publish_to_pubsub(topic_name, message):
-    """publish a message to specific pub/sub topic"""
-
-    global project_id
-
-    # Prepare to turn to the existing pub/sub topic
-    topic_path = publisher.topic_path(project_id, topic_name)
-
-    # Prepare the message
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    # Publish a message
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info(
-            f'Pub/sub message to topic {topic_name} with event_id = {publish_future.result()} has '
-            f'been triggered. Content: {message}'
-        )
-
-    except Exception as e:
-        logging.info(f'Not able to send pub/sub message: {message}')
-        logging.exception(e)
-
-    return None
-
-
 def notify_admin(message):
     """send the pub/sub message to Debug to Admin"""
 
@@ -1023,15 +983,6 @@ def sql_connect():
     pool.dialect.description_encoding = None
 
     return pool
-
-
-def get_secrets(secret_request):
-    """get the secret stored in Google Cloud Secrets"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
 
 
 def define_start_time_of_search(blocks):

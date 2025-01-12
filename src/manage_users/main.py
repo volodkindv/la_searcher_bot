@@ -1,18 +1,10 @@
 import base64
 import datetime
-import json
 import logging
-import urllib.request
 
 import psycopg2
-from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
-
-publisher = pubsub_v1.PublisherClient()
+from _dependencies.funcs import get_secrets, publish_to_pubsub
 
 
 def process_pubsub_message(event):
@@ -44,51 +36,12 @@ def process_pubsub_message(event):
     return message_in_ascii
 
 
-def publish_to_pubsub(topic_name, message):
-    """publishing a new message to pub/sub"""
-
-    global project_id
-
-    # Preparing to turn to the existing pub/sub topic
-    # topic_name = 'topic_notify_admin'
-    topic_path = publisher.topic_path(project_id, topic_name)
-    # Preparing the message
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-    # Publishes a message
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info('Pub/sub message published from User Management: ' + message)
-
-    except Exception as e:
-        logging.error('Publish to pub/sub from User Management failed: ' + repr(e))
-        logging.exception(e)
-
-    return None
-
-
 def notify_admin(message):
     """send the pub/sub message to Debug to Admin"""
 
     publish_to_pubsub('topic_notify_admin', message)
 
     return None
-
-
-def get_secrets(secret_request):
-    """get secret from GCP Secret Manager"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    client = secretmanager.SecretManagerServiceClient()
-
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
 
 
 def sql_connect_by_psycopg2():

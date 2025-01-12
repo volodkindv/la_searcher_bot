@@ -3,24 +3,15 @@ which contain updates – and makes a pub/sub call for other script to parse con
 
 import ast
 import base64
-import json
 import logging
-import urllib.request
 
-import google.cloud.logging
 import requests
 from bs4 import BeautifulSoup, SoupStrainer  # noqa
-from google.cloud import pubsub_v1, storage
+from google.cloud import storage
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import publish_to_pubsub, setup_google_logging
 
-publisher = pubsub_v1.PublisherClient()
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
+setup_google_logging()
 
 
 def process_pubsub_message(event):
@@ -36,33 +27,6 @@ def process_pubsub_message(event):
     message_in_ascii = data_in_ascii['message']
 
     return message_in_ascii
-
-
-def publish_to_pubsub(topic_name, message):
-    """publishing a new message to pub/sub"""
-
-    global project_id
-
-    # Preparing to turn to the existing pub/sub topic
-    topic_path = publisher.topic_path(project_id, topic_name)
-    # Preparing the message
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-    # Publishes a message
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify that the publishing succeeded
-        logging.info('Pub/sub message was published successfully')
-
-    except Exception as e:
-        logging.info('Pub/sub message was NOT published, fired an error')
-        logging.exception(e)
-
-    return None
 
 
 def set_cloud_storage(folder_num):

@@ -9,21 +9,12 @@ import random
 import time
 import urllib.request
 
-import google.cloud.logging
 import psycopg2
 import requests
-from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-client = secretmanager.SecretManagerServiceClient()
-publisher = pubsub_v1.PublisherClient()
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
+setup_google_logging()
 
 # To get rid of telegram "Retrying" Warning logs, which are shown in GCP Log Explorer as Errors.
 # Important – these are not errors, but just informational warnings that there were retries, that's why we exclude them
@@ -60,15 +51,6 @@ def process_pubsub_message(event):
     return message_in_ascii
 
 
-def get_secrets(secret_request):
-    """get secret stored in GCP"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
-
-
 def sql_connect_by_psycopg2():
     """connect to GCP SLQ via PsycoPG2"""
 
@@ -90,31 +72,6 @@ def sql_connect_by_psycopg2():
         conn_psy = None
 
     return conn_psy
-
-
-def publish_to_pubsub(topic_name, message):
-    """publish a new message to pub/sub"""
-
-    global project_id
-
-    topic_path = publisher.topic_path(project_id, topic_name)
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info(f'Sent pub/sub message: {str(message)}')
-
-    except Exception as e:
-        logging.error('Not able to send pub/sub message: ' + repr(e))
-        logging.exception(e)
-
-    return None
 
 
 def notify_admin(message):

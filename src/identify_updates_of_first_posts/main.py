@@ -10,35 +10,16 @@ import json
 import logging
 import random
 import re
-import urllib.request
 
-import google.cloud.logging
 import requests
 import sqlalchemy
 from bs4 import BeautifulSoup, NavigableString
-from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-publisher = pubsub_v1.PublisherClient()
-client = secretmanager.SecretManagerServiceClient()
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
+setup_google_logging()
 
 requests_session = requests.Session()
-
-
-def get_secrets(secret_request):
-    """get GCP secret"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
 
 
 def sql_connect():
@@ -87,29 +68,6 @@ def process_pubsub_message(event):
     logging.info(f'LOGGING-INFO: incoming Pub/Sub message: {message_in_ascii}')
 
     return message_in_ascii
-
-
-def publish_to_pubsub(topic_name, message):
-    """publish a new message to pub/sub"""
-
-    topic_path = publisher.topic_path(project_id, topic_name)
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info(f'Sent pub/sub message: {message}')
-
-    except Exception as e:
-        logging.error('Not able to send pub/sub message')
-        logging.exception(e)
-
-    return None
 
 
 def notify_admin(message):

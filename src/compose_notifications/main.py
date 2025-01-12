@@ -8,22 +8,13 @@ import logging
 import math
 import random
 import re
-import urllib.request
 
-import google.cloud.logging
 import sqlalchemy
-from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-client = secretmanager.SecretManagerServiceClient()
-publisher = pubsub_v1.PublisherClient()
+setup_google_logging()
 
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
 
 WINDOW_FOR_NOTIFICATIONS_DAYS = 60
 
@@ -318,15 +309,6 @@ def sql_connect():
         pool = None
 
     return pool
-
-
-def get_secrets(secret_request):
-    """get secret stored in GCP"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
 
 
 def age_writer(age):
@@ -1886,31 +1868,6 @@ def compose_individual_message_on_first_post_change(new_record, region_to_show):
     message = message.format(region=region)
 
     return message
-
-
-def publish_to_pubsub(topic_name, message):
-    """publish a new message to pub/sub"""
-
-    global project_id
-
-    topic_path = publisher.topic_path(project_id, topic_name)
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info(f'Sent pub/sub message: {message}')
-
-    except Exception as e:
-        logging.info('Not able to send pub/sub message: ')
-        logging.exception(e)
-
-    return None
 
 
 def notify_admin(message):

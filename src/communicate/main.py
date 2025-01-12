@@ -13,10 +13,8 @@ import urllib.parse
 import urllib.request
 from typing import Dict, Union
 
-import google.cloud.logging
 import psycopg2
 import requests
-from google.cloud import pubsub_v1, secretmanager
 from telegram import (
     Bot,
     InlineKeyboardMarkup,
@@ -27,15 +25,9 @@ from telegram import (
 )
 from telegram.ext import Application, ContextTypes
 
-publisher = pubsub_v1.PublisherClient()
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
-client = secretmanager.SecretManagerServiceClient()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
+setup_google_logging()
 
 # To get rid of telegram "Retrying" Warning logs, which are shown in GCP Log Explorer as Errors.
 # Important – these are not errors, but jest informational warnings that there were retries, that's why we exclude them
@@ -268,15 +260,6 @@ class AllButtons:
         return [k for k, v in self.__dict__.items()]
 
 
-def get_secrets(secret_request):
-    """Get GCP secret"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
-
-
 def sql_connect_by_psycopg2():
     """connect to GCP SLQ via PsycoPG2"""
 
@@ -290,33 +273,6 @@ def sql_connect_by_psycopg2():
     conn_psy.autocommit = True
 
     return conn_psy
-
-
-def publish_to_pubsub(topic_name, message):
-    """Publish a message to pub/sub"""
-
-    # Prepare to turn to the existing pub/sub topic
-    topic_path = publisher.topic_path(project_id, topic_name)
-
-    # Prepare the message
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    # Publish the message
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify that publishing succeeded
-        logging.info(f'Pub/sub message was published: {message}')
-
-    except Exception as e:
-        logging.info('Pub/sub message was NOT published')
-        logging.exception(e)
-
-    return None
 
 
 def notify_admin(message):

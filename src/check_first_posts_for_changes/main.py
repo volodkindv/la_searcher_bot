@@ -23,7 +23,6 @@ from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_log
 setup_google_logging()
 
 
-
 requests_session = requests.Session()
 
 bad_gateway_counter = 0
@@ -102,8 +101,6 @@ def sql_connect():
     pool.dialect.description_encoding = None
 
     return pool
-
-
 
 
 def notify_admin(message):
