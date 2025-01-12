@@ -5,8 +5,8 @@ from google.cloud import bigquery
 from telegram import Bot
 from telegram.ext import ExtBot
 
-from tests.common import get_event_with_data
 from archive_to_bigquery.main import main
+from tests.common import get_event_with_data
 
 
 @pytest.fixture
@@ -19,7 +19,6 @@ def patch_big_query():
 
 
 def test_main(patch_big_query):
-
     event = get_event_with_data(
         {
             'topic_id': 123,

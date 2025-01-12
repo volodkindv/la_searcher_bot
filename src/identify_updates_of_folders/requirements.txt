@@ -11,6 +11,7 @@ google-cloud-audit-log==0.3.0
 google-cloud-core==2.4.1
 google-cloud-logging==3.5.0
 google-cloud-pubsub==2.16.0
+google-cloud-secret-manager==2.16.0
 google-cloud-storage==2.10.0
 google-crc32c==1.6.0
 google-resumable-media==2.7.2
