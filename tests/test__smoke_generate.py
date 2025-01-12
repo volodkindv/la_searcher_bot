@@ -8,6 +8,7 @@ import pytest
 
 
 class TestSmokeTestGeneration:
+    @pytest.mark.skip(reason='Использовалось для генерации тест-кейсов')
     def test_generate_all(self):
         """generate all smoke testcases"""
 
@@ -143,7 +144,7 @@ def get_broken_testscases_text() -> str:
     paste here output of pytest
     run `test_generate_all` again
     """
-
+    # return ""
     return """
 FAILED tests/smoke/test_api_get_active_searches_generated.py::test_evaluate_city_locations - TypeError: eval() arg 1 must be a string, bytes or code object
 FAILED tests/smoke/test_api_get_active_searches_generated.py::test_time_counter_since_search_start - TypeError: '<' not supported between instances of 'MagicMock' and 'int'
@@ -162,21 +163,21 @@ FAILED tests/smoke/test_communicate_generated.py::test_send_message_to_api - Att
 FAILED tests/smoke/test_communicate_generated.py::test_time_counter_since_search_start - TypeError: '<' not supported between instances of 'MagicMock' and 'int'
 FAILED tests/smoke/test_compose_notifications_generated.py::test_check_if_need_compose_more - TypeError: Object of type MagicMock is not JSON serializable
 FAILED tests/smoke/test_compose_notifications_generated.py::test_compose_com_msg_on_new_topic - TypeError: '>=' not supported between instances of 'MagicMock' and 'int'
-FAILED tests/smoke/test_compose_notifications_generated.py::test_enrich_new_record_with_emoji - KeyError: <MagicMock name='mock.topic_type_id' id='138343183795200'>
+FAILED tests/smoke/test_compose_notifications_generated.py::test_enrich_new_record_with_emoji - KeyError: <MagicMock name='mock.topic_type_id' id='127655753172448'>
 FAILED tests/smoke/test_compose_notifications_generated.py::test_main - sqlalchemy.exc.ProgrammingError: (pg8000.dbapi.ProgrammingError) {'S': 'ERROR', 'V': 'ERROR', 'C': '22P02', 'M': 'inval...
-FAILED tests/smoke/test_connect_to_forum_generated.py::test_get_user_attributes - requests.exceptions.MissingSchema: Invalid URL "<MagicMock name='mock.__radd__()' id='138343183880144'>": No scheme sup...
-FAILED tests/smoke/test_connect_to_forum_generated.py::test_get_user_id - requests.exceptions.MissingSchema: Invalid URL "<MagicMock name='mock.__radd__()' id='138343205514752'>": No scheme sup...
+FAILED tests/smoke/test_connect_to_forum_generated.py::test_get_user_attributes - requests.exceptions.MissingSchema: Invalid URL "<MagicMock name='mock.__radd__()' id='127655774072272'>": No scheme sup...
+FAILED tests/smoke/test_connect_to_forum_generated.py::test_get_user_id - requests.exceptions.MissingSchema: Invalid URL "<MagicMock name='mock.__radd__()' id='127655806266304'>": No scheme sup...
 FAILED tests/smoke/test_connect_to_forum_generated.py::test_main - TypeError: argument should be a bytes-like object or ASCII string, not 'MagicMock'
 FAILED tests/smoke/test_connect_to_forum_generated.py::test_process_sending_message_async - telegram.error.InvalidToken: The token `foo` was rejected by the server.
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_clean_up_content_2 - TypeError: expected string or bytes-like object
-FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_compose_diff_message - TypeError: lines to compare must be str, not MagicMock (<MagicMock name='mock.__getitem__()' id='138343100205424'>)
+FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_compose_diff_message - TypeError: lines to compare must be str, not MagicMock (<MagicMock name='mock.__getitem__()' id='127655816730352'>)
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_get_compressed_first_post - TypeError: expected string or bytes-like object
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_get_field_trip_details_from_text - TypeError: expected string or bytes-like object
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_get_the_list_of_coords_out_of_text - TypeError: expected string or bytes-like object
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_main -   File "<string>", line 1
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_process_pubsub_message -   File "<string>", line 1
 FAILED tests/smoke/test_identify_updates_of_first_posts_generated.py::test_split_text_to_deleted_and_regular_parts - TypeError: expected string or bytes-like object
-FAILED tests/smoke/test_identify_updates_of_folders_generated.py::test_compare_old_and_new_folder_hash_and_give_list_of_upd_folders - ValueError: malformed node or string on line <MagicMock name='mock.lineno' id='138343215306816'>: <MagicMock id='138343...
+FAILED tests/smoke/test_identify_updates_of_folders_generated.py::test_compare_old_and_new_folder_hash_and_give_list_of_upd_folders - ValueError: malformed node or string on line <MagicMock name='mock.lineno' id='127655805615648'>: <MagicMock id='127655...
 FAILED tests/smoke/test_identify_updates_of_folders_generated.py::test_main -   File "<string>", line 1
 FAILED tests/smoke/test_identify_updates_of_folders_generated.py::test_process_pubsub_message -   File "<string>", line 1
 FAILED tests/smoke/test_identify_updates_of_folders_generated.py::test_set_cloud_storage - ValueError: not enough values to unpack (expected 2, got 0)
@@ -191,9 +192,7 @@ FAILED tests/smoke/test_identify_updates_of_topics_generated.py::test_set_cloud_
 FAILED tests/smoke/test_identify_updates_of_topics_generated.py::test_visibility_check - TypeError: expected string or bytes-like object
 FAILED tests/smoke/test_identify_updates_of_topics_generated.py::test_write_snapshot_to_cloud_storage - ValueError: not enough values to unpack (expected 2, got 0)
 FAILED tests/smoke/test_manage_topics_generated.py::test_process_pubsub_message -   File "<string>", line 1
-FAILED tests/smoke/test_manage_users_generated.py::test_save_new_user - psycopg2.ProgrammingError: can't adapt type 'MagicMock'
-FAILED tests/smoke/test_manage_users_generated.py::test_save_onboarding_step - psycopg2.ProgrammingError: can't adapt type 'MagicMock'
-FAILED tests/smoke/test_manage_users_generated.py::test_save_updated_status_for_user - KeyError: <MagicMock id='138343184144592'>
+FAILED tests/smoke/test_manage_users_generated.py::test_save_updated_status_for_user - KeyError: <MagicMock id='127655732166272'>
 FAILED tests/smoke/test_send_debug_to_admin_generated.py::test_main - TypeError: argument should be a bytes-like object or ASCII string, not 'MagicMock'
 FAILED tests/smoke/test_send_debug_to_admin_generated.py::test_process_sending_message_async - telegram.error.InvalidToken: The token `123:foo` was rejected by the server.
 FAILED tests/smoke/test_send_notifications_generated.py::test_finish_time_analytics - ZeroDivisionError: division by zero
@@ -205,5 +204,5 @@ FAILED tests/smoke/test_send_notifications_helper_generated.py::test_finish_time
 FAILED tests/smoke/test_send_notifications_helper_generated.py::test_main - psycopg2.ProgrammingError: can't adapt type 'MagicMock'
 FAILED tests/smoke/test_user_provide_info_generated.py::test_evaluate_city_locations - TypeError: eval() arg 1 must be a string, bytes or code object
 FAILED tests/smoke/test_user_provide_info_generated.py::test_time_counter_since_search_start - TypeError: '<' not supported between instances of 'MagicMock' and 'int'
-FAILED tests/smoke/test_user_provide_info_generated.py::test_verify_telegram_data_string - TypeError: object supporting the buffer API required        
+FAILED tests/smoke/test_user_provide_info_generated.py::test_verify_telegram_data_string - TypeError: object supporting the buffer API required
 """

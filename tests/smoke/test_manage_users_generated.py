@@ -22,14 +22,12 @@ def test_save_default_notif_settings():
 
 
 def test_save_new_user():
-    with pytest.raises(Exception):
-        res = main.save_new_user(user_id=1, username='foo', timestamp=MagicMock())
+    res = main.save_new_user(user_id=1, username='foo', timestamp=datetime.now())
     pass
 
 
 def test_save_onboarding_step():
-    with pytest.raises(Exception):
-        res = main.save_onboarding_step(user_id=1, step_name='foo', timestamp=MagicMock())
+    res = main.save_onboarding_step(user_id=1, step_name='foo', timestamp=datetime.now())
     pass
 
 

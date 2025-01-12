@@ -50,7 +50,7 @@ def sql_connect_by_psycopg2():
     return conn_psy
 
 
-def save_onboarding_step(user_id: int, step_name: str, timestamp: datetime) -> None:
+def save_onboarding_step(user_id: int, step_name: str, timestamp: datetime.datetime) -> None:
     """save a step of onboarding"""
 
     dict_steps = {
@@ -120,7 +120,7 @@ def save_updated_status_for_user(action, user_id, timestamp):
     return None
 
 
-def save_new_user(user_id: int, username: str, timestamp: datetime) -> None:
+def save_new_user(user_id: int, username: str, timestamp: datetime.datetime) -> None:
     """if the user is new – save to users table"""
 
     # set PSQL connection & cursor
