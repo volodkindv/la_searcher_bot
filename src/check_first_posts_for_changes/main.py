@@ -18,17 +18,13 @@ import requests
 import sqlalchemy  # idea for optimization – to move to psycopg2
 from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-client = secretmanager.SecretManagerServiceClient()
+setup_google_logging()
+
+
+
 requests_session = requests.Session()
-publisher = pubsub_v1.PublisherClient()
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
 
 bad_gateway_counter = 0
 
@@ -108,30 +104,6 @@ def sql_connect():
     return pool
 
 
-def publish_to_pubsub(topic_name, message):
-    """publish a new message to pub/sub"""
-
-    topic_path = publisher.topic_path(project_id, topic_name)
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info(
-            f'Pub/sub message to topic {topic_name} with event_id = {publish_future.result()} has '
-            f'been triggered. Content: {message}'
-        )
-
-    except Exception as e:
-        logging.info(f'Not able to send pub/sub message: {message}')
-        logging.exception(e)
-
-    return None
 
 
 def notify_admin(message):

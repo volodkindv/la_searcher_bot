@@ -1,9 +1,6 @@
-import json
 import logging
-import urllib.request
 
 import sqlalchemy
-from google.cloud import pubsub_v1, secretmanager
 
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 

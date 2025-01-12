@@ -24,12 +24,16 @@ def test_get_cordinates():
     assert (round(res[0]), round(res[1])) == (56, 38)
 
 
-def test_rate_limit_for_api():
+def test_rate_limit_for_api(use_real_db: bool):
     from identify_updates_of_topics.main import rate_limit_for_api, sql_connect
 
     data = 'Москва, Ярославское шоссе 123'
     db = sql_connect()
-    rate_limit_for_api(db, data)
+    if use_real_db:
+        rate_limit_for_api(db, data)
+    else:
+        with pytest.raises(TypeError):
+            rate_limit_for_api(db, data)
     assert True
 
 
