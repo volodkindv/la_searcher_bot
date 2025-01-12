@@ -195,7 +195,7 @@ def test_make_api_call():
 
 
 def test_manage_age():
-    res = main.manage_age(cur=MagicMock(), user_id=MagicMock(), user_input=MagicMock())
+    res = main.manage_age(cur=MagicMock(), user_id=MagicMock(), user_input='foo')
     pass
 
 
@@ -365,7 +365,7 @@ def test_save_last_user_inline_dialogue():
 
 
 def test_save_new_user():
-    res = main.save_new_user(user_id=MagicMock(), username=MagicMock())
+    res = main.save_new_user(user_id=1, username='foo')
     pass
 
 

@@ -2,7 +2,6 @@
 which contain updates – and makes a pub/sub call for other script to parse content of these folders"""
 
 import ast
-import base64
 import logging
 
 import requests
@@ -10,23 +9,9 @@ from bs4 import BeautifulSoup, SoupStrainer  # noqa
 from google.cloud import storage
 
 from _dependencies.funcs import publish_to_pubsub, setup_google_logging
+from _dependencies.misc import process_pubsub_message
 
 setup_google_logging()
-
-
-def process_pubsub_message(event):
-    """convert incoming pub/sub message into regular data"""
-
-    # receiving message text from pub/sub
-    if 'data' in event:
-        received_message_from_pubsub = base64.b64decode(event['data']).decode('utf-8')
-    else:
-        received_message_from_pubsub = 'I cannot read message from pub/sub'
-    encoded_to_ascii = eval(received_message_from_pubsub)
-    data_in_ascii = encoded_to_ascii['data']
-    message_in_ascii = data_in_ascii['message']
-
-    return message_in_ascii
 
 
 def set_cloud_storage(folder_num):

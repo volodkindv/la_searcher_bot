@@ -14,7 +14,7 @@ def test_prepare_message_for_async():
 
 
 def test_process_pubsub_message():
-    res = main.process_pubsub_message(event=MagicMock())
+    res = main.process_pubsub_message(event={})
     pass
 
 

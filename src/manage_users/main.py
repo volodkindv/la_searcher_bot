@@ -7,7 +7,7 @@ import psycopg2
 from _dependencies.funcs import get_secrets, publish_to_pubsub
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """convert incoming pub/sub message into regular data"""
 
     # FIXME

@@ -74,7 +74,7 @@ def test_mark_up_onboarding_status_99():
 
 
 def test_process_pubsub_message():
-    res = main.process_pubsub_message(event=MagicMock())
+    res = main.process_pubsub_message(event={})
     pass
 
 

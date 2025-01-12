@@ -420,7 +420,7 @@ def define_dist_and_dir_to_search(search_lat, search_lon, user_let, user_lon):
     return dist, direction
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """get the readable message from incoming pub/sub call"""
 
     # receive message text from pub/sub

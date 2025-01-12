@@ -55,7 +55,7 @@ def sql_connect():
     return pool
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """get the readable message from incoming pub/sub call"""
 
     # receive message text from pub/sub

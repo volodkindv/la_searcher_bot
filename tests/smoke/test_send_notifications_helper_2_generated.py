@@ -62,8 +62,8 @@ def test_main():
     pass
 
 
-def test_process_pubsub_message():
-    res = main.process_pubsub_message(event=MagicMock())
+def test_process_pubsub_message_v2():
+    res = main.process_pubsub_message_v2(event={})
     pass
 
 

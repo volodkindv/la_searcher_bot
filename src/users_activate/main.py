@@ -12,7 +12,7 @@ logger.setLevel(logging.DEBUG)
 logging.warning('it is a synthetic warning')
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """convert incoming pub/sub message into regular data"""
 
     # FIXME

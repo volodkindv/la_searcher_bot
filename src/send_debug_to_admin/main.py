@@ -16,7 +16,7 @@ logging.getLogger('telegram.vendor.ptb_urllib3.urllib3').setLevel(logging.ERROR)
 logger = logging.getLogger(__name__)
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """get the text message from pubsub"""
 
     # receiving message text from pub/sub

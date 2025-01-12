@@ -19,7 +19,7 @@ def test_main():
 
 
 def test_process_pubsub_message():
-    res = main.process_pubsub_message(event=MagicMock())
+    res = main.process_pubsub_message(event={})
     pass
 
 

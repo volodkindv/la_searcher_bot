@@ -1385,7 +1385,7 @@ def get_param_if_exists(upd, func_input):
     return func_output
 
 
-def manage_age(cur, user_id, user_input):
+def manage_age(cur, user_id, user_input: str):
     """Save user Age preference and generate the list of updated Are preferences"""
 
     class AgePeriod:
@@ -2342,7 +2342,7 @@ def get_basic_update_parameters(update):
     )
 
 
-def save_new_user(user_id, username):
+def save_new_user(user_id: int, username: str) -> None:
     """send pubsub message to dedicated script to save new user"""
 
     username = username if username else 'unknown'

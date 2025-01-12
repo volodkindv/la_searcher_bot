@@ -33,7 +33,7 @@ analytics_delays = []
 analytics_parsed_times = []
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """get message from pub/sub notification"""
 
     # receiving message text from pub/sub

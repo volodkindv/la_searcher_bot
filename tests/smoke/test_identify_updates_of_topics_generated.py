@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock
 
-import _dependencies.misc
 from identify_updates_of_topics import main
 
 
@@ -35,7 +34,7 @@ def test_main():
 
 
 def test_make_api_call():
-    res = _dependencies.misc.make_api_call(function='foo', data={})
+    res = main.make_api_call(function='foo', data={})
     pass
 
 
@@ -65,7 +64,7 @@ def test_process_one_folder():
 
 
 def test_process_pubsub_message():
-    res = main.process_pubsub_message(event=MagicMock())
+    res = main.process_pubsub_message(event={})
     pass
 
 

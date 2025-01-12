@@ -917,7 +917,7 @@ def update_coordinates(db, list_of_search_objects):
     return None
 
 
-def process_pubsub_message(event):
+def process_pubsub_message(event: dict):
     """convert incoming pub/sub message into regular data"""
 
     # receiving message text from pub/sub

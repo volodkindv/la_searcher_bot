@@ -4,7 +4,6 @@ from pathlib import Path
 import pytest
 
 
-# @pytest.mark.skip(reason='Использовалось для генерации тест-кейсов')
 class TestSmokeTestGeneration:
     def test_generate_all(self):
         """generate all smoke testcases"""
@@ -30,6 +29,7 @@ class TestSmokeTestGeneration:
         signature = self._generate_call_signature(example)
         assert signature == "v1='foo', v2=1, v3=MagicMock(v3=None)"
 
+    @pytest.mark.skip(reason='Использовалось для генерации тест-кейсов')
     def test_generate_cases_example(self):
         """generate testcases for single module"""
         import communicate.main
