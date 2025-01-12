@@ -1,4 +1,5 @@
 import base64
+import logging
 
 import google.auth.transport.requests
 import google.cloud.logging

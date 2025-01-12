@@ -89,7 +89,7 @@ def sql_connect():
     return pool
 
 
-def define_topic_visibility_by_content(content):
+def define_topic_visibility_by_content(content: str) -> str:
     """define visibility for the topic's content: regular, hidden or deleted"""
 
     if content.find('Запрошенной темы не существует.') > -1:
@@ -202,7 +202,7 @@ def parse_search(search_num):
     return content, site_unavailable
 
 
-def get_status_from_content_and_send_to_topic_management(topic_id, act_content):
+def get_status_from_content_and_send_to_topic_management(topic_id: str, act_content: str):
     """block to check if Status of the search has changed – if so send a pub/sub to topic_management"""
 
     # get the Title out of page content (intentionally avoid BS4 to make pack slimmer)

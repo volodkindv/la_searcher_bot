@@ -1,7 +1,6 @@
 """Send the prepared notifications to users (text and location) via Telegram"""
 
 import ast
-import base64
 import datetime
 import json
 import logging

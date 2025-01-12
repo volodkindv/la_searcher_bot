@@ -5,7 +5,7 @@ from check_first_posts_for_changes import main
 
 
 def test_define_topic_visibility_by_content():
-    res = main.define_topic_visibility_by_content(content=MagicMock())
+    res = main.define_topic_visibility_by_content(content='foo')
     pass
 
 
@@ -15,7 +15,7 @@ def test_define_topic_visibility_by_topic_id():
 
 
 def test_get_status_from_content_and_send_to_topic_management():
-    res = main.get_status_from_content_and_send_to_topic_management(topic_id=MagicMock(), act_content=MagicMock())
+    res = main.get_status_from_content_and_send_to_topic_management(topic_id='foo', act_content='foo')
     pass
 
 

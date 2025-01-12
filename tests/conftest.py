@@ -129,6 +129,20 @@ def common_patches():
 
 
 @pytest.fixture(autouse=True)
+def patch_http():
+    with (
+        patch('requests.get'),
+        patch('requests.post'),
+        patch('requests.session'),
+        patch('requests.Session'),
+        patch('google.auth.transport.requests.Request'),
+        patch('google.auth.default'),
+        patch('google.oauth2.id_token.fetch_id_token'),
+    ):
+        yield
+
+
+@pytest.fixture(autouse=True)
 def patch_pubsub_client() -> MagicMock:
     with patch('google.cloud.pubsub_v1.PublisherClient', MagicMock()) as mock:
         yield mock
