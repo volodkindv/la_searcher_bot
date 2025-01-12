@@ -6,6 +6,7 @@ on:
   push:
     branches : [main]
     paths:
+      - 'src/_dependencies/*' # UPD HERE!
       - 'src/users_activate/*' # UPD HERE!
       - '.github/workflows/deploy_users_activate.yml' # UPD HERE!
 
