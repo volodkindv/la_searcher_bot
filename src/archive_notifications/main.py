@@ -5,22 +5,10 @@ import urllib.request
 import sqlalchemy
 from google.cloud import pubsub_v1, secretmanager
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
-client = secretmanager.SecretManagerServiceClient()
-publisher = pubsub_v1.PublisherClient()
-
-
-def get_secrets(secret_request):
-    """get GCP secret"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
+# setup_google_logging()
+# do we need google cloud logging here?
 
 
 def sql_connect():
@@ -52,29 +40,6 @@ def sql_connect():
     pool.dialect.description_encoding = None
 
     return pool
-
-
-def publish_to_pubsub(topic_name, message):
-    """publish a new message to pub/sub"""
-
-    topic_path = publisher.topic_path(project_id, topic_name)
-    message_json = json.dumps(
-        {
-            'data': {'message': message},
-        }
-    )
-    message_bytes = message_json.encode('utf-8')
-
-    try:
-        publish_future = publisher.publish(topic_path, data=message_bytes)
-        publish_future.result()  # Verify the publishing succeeded
-        logging.info('Sent pub/sub message: ' + str(message))
-
-    except Exception as e:
-        logging.error('Not able to send pub/sub message: ' + repr(e))
-        logging.exception(e)
-
-    return None
 
 
 def move_notifications_to_history_in_psql(conn):

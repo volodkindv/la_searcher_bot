@@ -10,7 +10,7 @@ import functions_framework
 import psycopg2
 from bs4 import BeautifulSoup
 
-from _dependencies.funcs import get_secrets, setup_google_logging
+from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
 setup_google_logging()
 
