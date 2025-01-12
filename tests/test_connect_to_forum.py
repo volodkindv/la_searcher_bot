@@ -2,7 +2,7 @@ from unittest.mock import patch
 
 import pytest
 
-from connect_to_forum.main import main
+from connect_to_forum import main
 from tests.common import get_event_with_data
 
 
@@ -11,4 +11,4 @@ def test_main():
 
     with patch('connect_to_forum.main.session'):
         with pytest.raises(TypeError):
-            main(get_event_with_data(data), 'context')
+            main.main(get_event_with_data(data), 'context')

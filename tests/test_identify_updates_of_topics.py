@@ -2,43 +2,36 @@ from unittest.mock import patch
 
 import pytest
 
+from identify_updates_of_topics import main
 from tests.common import get_event_with_data
 
 
 def test_main():
-    from identify_updates_of_topics.main import main
-
     data = 'foo'
     with pytest.raises(ValueError):
-        main(get_event_with_data(data), 'context')
+        main.main(get_event_with_data(data), 'context')
     assert True
 
 
 def test_get_cordinates():
-    from identify_updates_of_topics.main import get_coordinates, sql_connect
-
     data = 'Москва, Ярославское шоссе 123'
-    db = sql_connect()
+    db = main.sql_connect()
     with patch('identify_updates_of_topics.main.rate_limit_for_api'):
-        res = get_coordinates(db, data)
+        res = main.get_coordinates(db, data)
     assert (round(res[0]), round(res[1])) == (56, 38)
 
 
 def test_rate_limit_for_api(use_real_db: bool):
-    from identify_updates_of_topics.main import rate_limit_for_api, sql_connect
-
     data = 'Москва, Ярославское шоссе 123'
-    db = sql_connect()
+    db = main.sql_connect()
     if use_real_db:
-        rate_limit_for_api(db, data)
+        main.rate_limit_for_api(db, data)
     else:
         with pytest.raises(TypeError):
-            rate_limit_for_api(db, data)
+            main.rate_limit_for_api(db, data)
     assert True
 
 
 def test_get_the_list_of_ignored_folders():
-    from identify_updates_of_topics.main import get_the_list_of_ignored_folders, sql_connect
-
-    res = get_the_list_of_ignored_folders(sql_connect())
+    res = main.get_the_list_of_ignored_folders(main.sql_connect())
     assert not res

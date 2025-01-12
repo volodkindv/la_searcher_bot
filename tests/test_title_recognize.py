@@ -2,7 +2,8 @@ from flask import Flask
 
 
 def test_main_positive():
-    from title_recognize.main import main
+    # TODO fix imports
+    from title_recognize.main import main, recognize_title
 
     app = Flask(__name__)
 
@@ -14,7 +15,7 @@ def test_main_positive():
 
 
 def test_main_wrong_request():
-    from title_recognize.main import main
+    from title_recognize.main import main, recognize_title
 
     app = Flask(__name__)
 
@@ -26,7 +27,7 @@ def test_main_wrong_request():
 
 
 def test_recognize_title():
-    from title_recognize.main import recognize_title
+    from title_recognize.main import main, recognize_title
 
     title = 'Пропал мужчина. ФИО - Иванов Иван Иванович. Возраст 37 лет. Ярославская область.'
     res = recognize_title(title, 'status_only')
