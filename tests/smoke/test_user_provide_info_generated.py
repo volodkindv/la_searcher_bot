@@ -3,11 +3,6 @@ from unittest.mock import MagicMock
 from user_provide_info import main
 
 
-def test_clean_up_content():
-    res = main.clean_up_content(init_content=MagicMock())
-    pass
-
-
 def test_evaluate_city_locations():
     res = main.evaluate_city_locations(city_locations=MagicMock())
     pass

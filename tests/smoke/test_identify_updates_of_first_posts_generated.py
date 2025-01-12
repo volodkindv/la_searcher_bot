@@ -8,11 +8,6 @@ def test_age_writer():
     pass
 
 
-def test_clean_up_content():
-    res = main.clean_up_content(init_content=MagicMock())
-    pass
-
-
 def test_compose_diff_message():
     res = main.compose_diff_message(curr_list=MagicMock(), prev_list=MagicMock())
     pass

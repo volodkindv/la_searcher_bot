@@ -54,10 +54,3 @@ def test_get_list_of_active_searches_from_db():
 
     res = main.get_list_of_active_searches_from_db(data)
     assert not res
-
-
-def test_clean_up_content():
-    data = '<span>some text</span>'
-
-    res = main.clean_up_content(data)
-    assert res == 'some text'

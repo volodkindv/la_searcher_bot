@@ -1,11 +1,7 @@
 from unittest.mock import MagicMock
 
+import _dependencies.funcs
 from api_get_active_searches import main
-
-
-def test_clean_up_content():
-    res = main.clean_up_content(init_content=MagicMock())
-    pass
 
 
 def test_evaluate_city_locations():
