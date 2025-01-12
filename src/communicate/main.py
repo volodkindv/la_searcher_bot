@@ -25,6 +25,7 @@ from telegram import (
 )
 from telegram.ext import Application, ContextTypes
 
+from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
 setup_google_logging()
@@ -273,14 +274,6 @@ def sql_connect_by_psycopg2():
     conn_psy.autocommit = True
 
     return conn_psy
-
-
-def notify_admin(message):
-    """send the pub/sub message to Debug to Admin"""
-
-    publish_to_pubsub('topic_notify_admin', message)
-
-    return None
 
 
 def time_counter_since_search_start(start_time):

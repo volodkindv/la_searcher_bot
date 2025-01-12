@@ -1,6 +1,5 @@
 from unittest.mock import MagicMock
 
-import _dependencies.funcs
 from api_get_active_searches import main
 
 

@@ -11,6 +11,7 @@ import re
 
 import sqlalchemy
 
+from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
 setup_google_logging()
@@ -1868,14 +1869,6 @@ def compose_individual_message_on_first_post_change(new_record, region_to_show):
     message = message.format(region=region)
 
     return message
-
-
-def notify_admin(message):
-    """send the pub/sub message to Debug to Admin"""
-
-    publish_to_pubsub('topic_notify_admin', message)
-
-    return None
 
 
 def mark_new_record_as_processed(conn, new_record):

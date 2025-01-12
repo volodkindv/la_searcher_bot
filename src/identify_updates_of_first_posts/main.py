@@ -15,6 +15,7 @@ import requests
 import sqlalchemy
 from bs4 import BeautifulSoup
 
+from _dependencies.admin import notify_admin
 from _dependencies.content import clean_up_content_2
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
@@ -69,14 +70,6 @@ def process_pubsub_message(event):
     logging.info(f'LOGGING-INFO: incoming Pub/Sub message: {message_in_ascii}')
 
     return message_in_ascii
-
-
-def notify_admin(message):
-    """send the pub/sub message to Debug to Admin"""
-
-    publish_to_pubsub('topic_notify_admin', message)
-
-    return None
 
 
 def get_the_list_of_coords_out_of_text(initial_text):

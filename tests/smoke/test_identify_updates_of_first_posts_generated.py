@@ -8,6 +8,11 @@ def test_age_writer():
     pass
 
 
+def test_clean_up_content_2():
+    res = main.clean_up_content_2(init_content=MagicMock())
+    pass
+
+
 def test_compose_diff_message():
     res = main.compose_diff_message(curr_list=MagicMock(), prev_list=MagicMock())
     pass
@@ -38,11 +43,6 @@ def test_main():
     pass
 
 
-def test_notify_admin():
-    res = main.notify_admin(message=MagicMock())
-    pass
-
-
 def test_parse_search_folder():
     res = main.parse_search_folder(search_num=MagicMock())
     pass
@@ -60,11 +60,6 @@ def test_process_first_page_comparison():
 
 def test_process_pubsub_message():
     res = main.process_pubsub_message(event=MagicMock())
-    pass
-
-
-def test_publish_to_pubsub():
-    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
     pass
 
 

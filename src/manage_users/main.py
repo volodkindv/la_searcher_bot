@@ -36,14 +36,6 @@ def process_pubsub_message(event):
     return message_in_ascii
 
 
-def notify_admin(message):
-    """send the pub/sub message to Debug to Admin"""
-
-    publish_to_pubsub('topic_notify_admin', message)
-
-    return None
-
-
 def sql_connect_by_psycopg2():
     """set the connection to psql via psycopg2"""
 

@@ -38,11 +38,6 @@ def test_make_api_call():
     pass
 
 
-def test_notify_admin():
-    res = main.notify_admin(message=MagicMock())
-    pass
-
-
 def test_parse_coordinates():
     res = main.parse_coordinates(db=MagicMock(), search_num=MagicMock())
     pass
@@ -80,11 +75,6 @@ def test_profile_get_managers():
 
 def test_profile_get_type_of_activity():
     res = main.profile_get_type_of_activity(text_of_activity=MagicMock())
-    pass
-
-
-def test_publish_to_pubsub():
-    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
     pass
 
 

@@ -21,6 +21,7 @@ from geopy.geocoders import Nominatim
 from google.cloud import storage
 from yandex_geocoder import Client, exceptions
 
+from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
 setup_google_logging()
@@ -915,14 +916,6 @@ def update_coordinates(db, list_of_search_objects):
                 conn.execute(stmt, a=coords[2], b=search_id)
 
             conn.close()
-
-    return None
-
-
-def notify_admin(message):
-    """send the pub/sub message to Debug to Admin"""
-
-    publish_to_pubsub('topic_notify_admin', message)
 
     return None
 

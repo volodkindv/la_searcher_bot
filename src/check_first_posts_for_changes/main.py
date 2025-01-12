@@ -15,6 +15,7 @@ import google.oauth2.id_token
 import requests
 import sqlalchemy  # idea for optimization – to move to psycopg2
 
+from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
 setup_google_logging()
@@ -89,14 +90,6 @@ def sql_connect():
     pool.dialect.description_encoding = None
 
     return pool
-
-
-def notify_admin(message):
-    """send the pub/sub message to Debug to Admin"""
-
-    publish_to_pubsub('topic_notify_admin', message)
-
-    return None
 
 
 def define_topic_visibility_by_content(content):

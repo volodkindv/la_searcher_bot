@@ -23,11 +23,6 @@ def test_process_pubsub_message():
     pass
 
 
-def test_publish_to_pubsub():
-    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
-    pass
-
-
 def test_read_snapshot_from_cloud_storage():
     res = main.read_snapshot_from_cloud_storage(folder_num=MagicMock())
     pass

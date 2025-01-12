@@ -289,11 +289,6 @@ def test_manage_topic_type():
     pass
 
 
-def test_notify_admin():
-    res = main.notify_admin(message=MagicMock())
-    pass
-
-
 def test_prepare_message_for_async():
     res = main.prepare_message_for_async(user_id=MagicMock(), data=MagicMock())
     pass
@@ -351,11 +346,6 @@ def test_process_user_coordinates():
         b_back_to_start=MagicMock(),
         bot_request_aft_usr_msg=MagicMock(),
     )
-    pass
-
-
-def test_publish_to_pubsub():
-    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
     pass
 
 

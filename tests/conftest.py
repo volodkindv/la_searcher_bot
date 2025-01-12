@@ -123,12 +123,12 @@ def patch_logging():
 
 @pytest.fixture(autouse=True)
 def common_patches():
-    """
-    Common patch for all tests to enable imports
-    """
-    with (
-        patch.object(urllib.request, 'urlopen') as urllib_request_mock,
-        patch('google.cloud.pubsub_v1.PublisherClient'),
-    ):
+    with patch.object(urllib.request, 'urlopen') as urllib_request_mock:
         urllib_request_mock.return_value = io.BytesIO(b'1')
         yield
+
+
+@pytest.fixture(autouse=True)
+def patch_pubsub_client() -> MagicMock:
+    with patch('google.cloud.pubsub_v1.PublisherClient', MagicMock()) as mock:
+        yield mock

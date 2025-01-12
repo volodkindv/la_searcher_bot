@@ -20,16 +20,6 @@ def test_main():
     pass
 
 
-def test_notify_admin():
-    res = main.notify_admin(message=MagicMock())
-    pass
-
-
-def test_publish_to_pubsub():
-    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
-    pass
-
-
 def test_setup_google_logging():
     res = main.setup_google_logging()
     pass

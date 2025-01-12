@@ -8,18 +8,8 @@ def test_main():
     pass
 
 
-def test_notify_admin():
-    res = main.notify_admin(message=MagicMock())
-    pass
-
-
 def test_process_pubsub_message():
     res = main.process_pubsub_message(event=MagicMock())
-    pass
-
-
-def test_publish_to_pubsub():
-    res = main.publish_to_pubsub(topic_name=MagicMock(), message=MagicMock())
     pass
 
 
