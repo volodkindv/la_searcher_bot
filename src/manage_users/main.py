@@ -120,7 +120,7 @@ def save_updated_status_for_user(action, user_id, timestamp):
     return None
 
 
-def save_new_user(user_id, username, timestamp):
+def save_new_user(user_id: int, username: str, timestamp: datetime) -> None:
     """if the user is new – save to users table"""
 
     # set PSQL connection & cursor

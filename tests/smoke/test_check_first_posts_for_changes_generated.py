@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from unittest.mock import MagicMock
 
 from check_first_posts_for_changes import main

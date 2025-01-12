@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from unittest.mock import MagicMock
 
 from connect_to_forum import main

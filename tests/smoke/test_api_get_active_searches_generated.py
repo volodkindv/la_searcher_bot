@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from unittest.mock import MagicMock
 
 from api_get_active_searches import main

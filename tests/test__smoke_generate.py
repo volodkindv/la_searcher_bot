@@ -1,4 +1,5 @@
 import inspect
+from datetime import date, datetime
 from pathlib import Path
 
 import pytest
@@ -23,11 +24,11 @@ class TestSmokeTestGeneration:
             )
 
     def test_generate_signature(self):
-        def example(v1: str, v2: int, v3=None):
+        def example(v1: str, v2: int, v3, v4: date, v5: datetime):
             pass
 
         signature = self._generate_call_signature(example)
-        assert signature == "v1='foo', v2=1, v3=MagicMock(v3=None)"
+        assert signature == "v1='foo', v2=1, v3=MagicMock(), v4=date.today(), v5=datetime.now()"
 
     @pytest.mark.skip(reason='Использовалось для генерации тест-кейсов')
     def test_generate_cases_example(self):
@@ -51,7 +52,12 @@ def test_{func_name}():
             'notify_admin',
         ]
         # functions that already have manual testcases
-        testcases = []
+        module_lines = [
+            'from unittest.mock import MagicMock',
+            'from datetime import date, datetime',
+            f'from {module_name} import main',
+        ]
+
         members = inspect.getmembers(module)
         for member_name, member in members:
             if member_name in ignore_list:
@@ -62,13 +68,10 @@ def test_{func_name}():
             args_str = self._generate_call_signature(member)
 
             testcase = template.format(module_name=module_name, func_name=member_name, args=args_str)
-            testcases.append(testcase)
+            module_lines.append(testcase)
 
-        testcases.insert(0, 'from unittest.mock import MagicMock')
-        testcases.insert(0, f'from {module_name} import main')
-
-        Path(res_filename).write_text('\n'.join(testcases))
-        return '\n'.join(testcases)
+        Path(res_filename).write_text('\n'.join(module_lines))
+        return '\n'.join(module_lines)
 
     def _generate_call_signature(self, member):
         signature = inspect.signature(member)
@@ -92,5 +95,9 @@ def test_{func_name}():
             return '{}'
         elif param._annotation is bool:
             return 'False'
+        elif param._annotation is datetime:
+            return 'datetime.now()'
+        elif param._annotation is date:
+            return 'date.today()'
         else:
             return 'MagicMock()'

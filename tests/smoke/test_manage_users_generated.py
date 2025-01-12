@@ -1,3 +1,4 @@
+from datetime import date, datetime
 from unittest.mock import MagicMock
 
 from manage_users import main
@@ -19,7 +20,7 @@ def test_save_default_notif_settings():
 
 
 def test_save_new_user():
-    res = main.save_new_user(user_id=MagicMock(), username=MagicMock(), timestamp=MagicMock())
+    res = main.save_new_user(user_id=1, username='foo', timestamp=MagicMock())
     pass
 
 
