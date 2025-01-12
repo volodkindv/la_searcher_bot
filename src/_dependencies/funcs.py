@@ -24,7 +24,7 @@ def get_project_id() -> str:
 
 
 @lru_cache  # TODO maybe cachetools/timed_lru_cache?
-def get_secrets(secret_request):
+def get_secrets(secret_request: str) -> str:
     """Get GCP secret"""
 
     name = f'projects/{get_project_id()}/secrets/{secret_request}/versions/latest'

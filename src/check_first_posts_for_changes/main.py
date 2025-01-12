@@ -6,17 +6,14 @@ Updates are either saved in PSQL or send via pub/sub to other scripts"""
 
 import datetime
 import hashlib
-import json
 import logging
 import re
-import urllib.request
 
 import google.auth.transport.requests
 import google.cloud.logging
 import google.oauth2.id_token
 import requests
 import sqlalchemy  # idea for optimization – to move to psycopg2
-from google.cloud import pubsub_v1, secretmanager
 
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
 
@@ -61,15 +58,6 @@ class PercentGroup:
             f'N{self.n: <2}: {self.sp}%–{self.fp}%. Updated every {self.f} minute(s){days}. '
             f'First delay = {self.d} minutes. nums {self.sn}-{self.fn}. num of searches {len(self.s)}'
         )
-
-
-def get_secrets(secret_request):
-    """get GCP secret"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
 
 
 def sql_connect():

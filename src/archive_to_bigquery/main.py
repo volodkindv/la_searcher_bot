@@ -1,26 +1,11 @@
 """move data from Cloud SQL to BigQuery for long-term storage & analysis"""
 
 import logging
-import urllib.request
 
 import sqlalchemy
-from google.cloud import bigquery, secretmanager
+from google.cloud import bigquery
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
-
-
-def get_secrets(secret_request):
-    """get secret from GCP Secret Manager"""
-
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    client = secretmanager.SecretManagerServiceClient()
-
-    response = client.access_secret_version(name=name)
-
-    return response.payload.data.decode('UTF-8')
+from _dependencies.funcs import get_secrets
 
 
 def sql_connect():

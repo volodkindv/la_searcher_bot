@@ -7,26 +7,20 @@ import urllib.parse
 import urllib.request
 from time import sleep
 
-import google.cloud.logging
 import psycopg2
 import requests
 from bs4 import BeautifulSoup
-from google.cloud import secretmanager
 from telegram import Bot, ReplyKeyboardMarkup
 from telegram.ext import Application, ContextTypes
 
-url = 'http://metadata.google.internal/computeMetadata/v1/project/project-id'
-req = urllib.request.Request(url)
-req.add_header('Metadata-Flavor', 'Google')
-project_id = urllib.request.urlopen(req).read().decode()
+from _dependencies.funcs import get_secrets, setup_google_logging
 
-client = secretmanager.SecretManagerServiceClient()
+setup_google_logging()
+
+
 session = requests.Session()
 cur = None
 conn_psy = None
-
-log_client = google.cloud.logging.Client()
-log_client.setup_logging()
 
 
 class ForumUser:
@@ -72,12 +66,6 @@ class ForumUser:
                 self.reg_date,
             ]
         )
-
-
-def get_secrets(secret_request):
-    name = f'projects/{project_id}/secrets/{secret_request}/versions/latest'
-    response = client.access_secret_version(name=name)
-    return response.payload.data.decode('UTF-8')
 
 
 def sql_connect_by_psycopg2():
