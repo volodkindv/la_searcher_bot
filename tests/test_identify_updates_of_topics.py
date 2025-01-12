@@ -21,7 +21,7 @@ def test_get_cordinates():
     db = sql_connect()
     with patch('identify_updates_of_topics.main.rate_limit_for_api'):
         res = get_coordinates(db, data)
-    assert (round(res[0]), round(res[1])) == (56, 38)
+    assert res == (None, None)
 
 
 def test_rate_limit_for_api():

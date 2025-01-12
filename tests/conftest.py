@@ -14,18 +14,27 @@ from sqlalchemy import create_engine as create_engine_original
 
 from tests.common import get_config
 
-USE_REAL_DB = False
-
 load_dotenv()
 
 
+@pytest.fixture(scope='session')
+def keep_db():
+    """do not recreate test db"""
+    return True
+
+
+@pytest.fixture(scope='session')
+def use_real_db():
+    return True
+
+
 @pytest.fixture(scope='session', autouse=True)
-def create_test_db():
+def create_test_db(use_real_db: bool, keep_db: bool):
     """
     Automatically recreate test database schema for using in tests
     Be careful: all data in database would be deleted!
     """
-    if not USE_REAL_DB:
+    if not use_real_db or keep_db:
         return
 
     from tests.tools import init_testing_db
@@ -34,7 +43,7 @@ def create_test_db():
 
 
 @pytest.fixture(autouse=True)
-def patch_psycopg2_connection(create_test_db):
+def patch_psycopg2_connection(create_test_db, use_real_db: bool):
     """Connect to local DB"""
 
     def psycopg2_connection_wrapped(*args, **kwargs):
@@ -48,13 +57,13 @@ def patch_psycopg2_connection(create_test_db):
             password=config.cloud_postgres_password,
         )
 
-    mocked_connection = psycopg2_connection_wrapped if USE_REAL_DB else MagicMock()
+    mocked_connection = psycopg2_connection_wrapped if use_real_db else MagicMock()
     with patch.object(psycopg2, 'connect', mocked_connection):
         yield
 
 
 @pytest.fixture(autouse=True)
-def patch_sqlalchemy_connection_url(create_test_db):
+def patch_sqlalchemy_connection_url(create_test_db, use_real_db: bool):
     """Connect to local DB"""
 
     def sqlalchemy_conn_url_wrapped(*args, **kwargs):
@@ -71,7 +80,7 @@ def patch_sqlalchemy_connection_url(create_test_db):
 
         return create_engine_original(url)
 
-    mocked_connection = sqlalchemy_conn_url_wrapped if USE_REAL_DB else MagicMock()
+    mocked_connection = sqlalchemy_conn_url_wrapped if use_real_db else MagicMock()
     with patch.object(sqlalchemy, 'create_engine', mocked_connection):
         yield
 
@@ -120,12 +129,26 @@ def patch_logging():
 
 @pytest.fixture(autouse=True)
 def common_patches():
-    """
-    Common patch for all tests to enable imports
-    """
-    with (
-        patch.object(urllib.request, 'urlopen') as urllib_request_mock,
-        patch('google.cloud.pubsub_v1.PublisherClient'),
-    ):
+    with patch.object(urllib.request, 'urlopen') as urllib_request_mock:
         urllib_request_mock.return_value = io.BytesIO(b'1')
         yield
+
+
+@pytest.fixture(autouse=True)
+def patch_http():
+    with (
+        patch('requests.get'),
+        patch('requests.post'),
+        patch('requests.session'),
+        patch('requests.Session'),
+        patch('google.auth.transport.requests.Request'),
+        patch('google.auth.default'),
+        patch('google.oauth2.id_token.fetch_id_token'),
+    ):
+        yield
+
+
+@pytest.fixture(autouse=True)
+def patch_pubsub_client() -> MagicMock:
+    with patch('google.cloud.pubsub_v1.PublisherClient', MagicMock()) as mock:
+        yield mock

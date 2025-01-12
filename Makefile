@@ -29,4 +29,11 @@ dependencies:
 	for d in $$(ls -1 src | grep -E ${SRC_FUNCTIONS_REGEX}); do \
 		cp src/_dependencies src/$$d/ -r ; \
 	done
-	
+
+smoke-tests-generate:
+	echo "" > build/pytest.log
+	uv run pytest tests/test__smoke_generate.py::TestSmokeTestGeneration::test_generate_all
+	uv run pytest . -v > build/pytest.log -k 'not test_generate_all' || true
+	uv run pytest tests/test__smoke_generate.py::TestSmokeTestGeneration::test_generate_all
+	make lint
+
