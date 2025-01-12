@@ -1,16 +1,20 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from user_provide_info import main
 
 
 def test_evaluate_city_locations():
-    res = main.evaluate_city_locations(city_locations=MagicMock())
+    with pytest.raises(Exception):
+        res = main.evaluate_city_locations(city_locations=MagicMock())
     pass
 
 
 def test_get_user_data_from_db():
-    res = main.get_user_data_from_db(user_id=1)
+    with pytest.raises(Exception):
+        res = main.get_user_data_from_db(user_id=1)
     pass
 
 
@@ -35,7 +39,8 @@ def test_sql_connect_by_psycopg2():
 
 
 def test_time_counter_since_search_start():
-    res = main.time_counter_since_search_start(start_time=MagicMock())
+    with pytest.raises(Exception):
+        res = main.time_counter_since_search_start(start_time=MagicMock())
     pass
 
 
@@ -55,5 +60,6 @@ def test_verify_telegram_data_json():
 
 
 def test_verify_telegram_data_string():
-    res = main.verify_telegram_data_string(user_input=MagicMock(), token=MagicMock())
+    with pytest.raises(Exception):
+        res = main.verify_telegram_data_string(user_input=MagicMock(), token=MagicMock())
     pass

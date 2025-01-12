@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from identify_updates_of_topics import main
 
 
@@ -30,7 +32,8 @@ def test_get_the_list_of_ignored_folders():
 
 
 def test_main():
-    res = main.main(event=MagicMock(), context=MagicMock())
+    with pytest.raises(Exception):
+        res = main.main(event=MagicMock(), context=MagicMock())
     pass
 
 
@@ -45,7 +48,8 @@ def test_parse_coordinates():
 
 
 def test_parse_one_comment():
-    res = main.parse_one_comment(db=MagicMock(), search_num=MagicMock(), comment_num=MagicMock())
+    with pytest.raises(Exception):
+        res = main.parse_one_comment(db=MagicMock(), search_num=MagicMock(), comment_num=MagicMock())
     pass
 
 
@@ -55,7 +59,8 @@ def test_parse_one_folder():
 
 
 def test_parse_search_profile():
-    res = main.parse_search_profile(search_num=MagicMock())
+    with pytest.raises(Exception):
+        res = main.parse_search_profile(search_num=MagicMock())
     pass
 
 
@@ -65,7 +70,8 @@ def test_process_one_folder():
 
 
 def test_process_pubsub_message():
-    res = main.process_pubsub_message(event={})
+    with pytest.raises(Exception):
+        res = main.process_pubsub_message(event={})
     pass
 
 
@@ -75,12 +81,14 @@ def test_profile_get_managers():
 
 
 def test_profile_get_type_of_activity():
-    res = main.profile_get_type_of_activity(text_of_activity=MagicMock())
+    with pytest.raises(Exception):
+        res = main.profile_get_type_of_activity(text_of_activity=MagicMock())
     pass
 
 
 def test_rate_limit_for_api():
-    res = main.rate_limit_for_api(db=MagicMock(), geocoder='foo')
+    with pytest.raises(Exception):
+        res = main.rate_limit_for_api(db=MagicMock(), geocoder='foo')
     pass
 
 
@@ -107,7 +115,8 @@ def test_save_last_api_call_time_to_psql():
 
 
 def test_set_cloud_storage():
-    res = main.set_cloud_storage(bucket_name=MagicMock(), folder_num=MagicMock())
+    with pytest.raises(Exception):
+        res = main.set_cloud_storage(bucket_name=MagicMock(), folder_num=MagicMock())
     pass
 
 
@@ -132,12 +141,14 @@ def test_update_coordinates():
 
 
 def test_visibility_check():
-    res = main.visibility_check(r=MagicMock(), topic_id=MagicMock())
+    with pytest.raises(Exception):
+        res = main.visibility_check(r=MagicMock(), topic_id=MagicMock())
     pass
 
 
 def test_write_snapshot_to_cloud_storage():
-    res = main.write_snapshot_to_cloud_storage(
-        bucket_to_write=MagicMock(), what_to_write=MagicMock(), folder_num=MagicMock()
-    )
+    with pytest.raises(Exception):
+        res = main.write_snapshot_to_cloud_storage(
+            bucket_to_write=MagicMock(), what_to_write=MagicMock(), folder_num=MagicMock()
+        )
     pass

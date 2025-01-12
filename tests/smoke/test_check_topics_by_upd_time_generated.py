@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from check_topics_by_upd_time import main
 
 

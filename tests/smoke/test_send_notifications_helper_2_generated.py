@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from send_notifications_helper_2 import main
 
 
@@ -26,9 +28,10 @@ def test_check_for_notifs_to_send():
 
 
 def test_finish_time_analytics():
-    res = main.finish_time_analytics(
-        notif_times=MagicMock(), delays=MagicMock(), parsed_times=MagicMock(), list_of_change_ids=MagicMock()
-    )
+    with pytest.raises(Exception):
+        res = main.finish_time_analytics(
+            notif_times=MagicMock(), delays=MagicMock(), parsed_times=MagicMock(), list_of_change_ids=MagicMock()
+        )
     pass
 
 

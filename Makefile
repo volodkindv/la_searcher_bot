@@ -5,7 +5,7 @@ venv:
 	uv sync --all-groups --all-extras --locked
 
 test:
-	uv run pytest .
+	uv run pytest . -v
 
 lint:
 	uv run ruff format src tests

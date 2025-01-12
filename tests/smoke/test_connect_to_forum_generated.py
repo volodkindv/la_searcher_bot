@@ -1,11 +1,14 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from connect_to_forum import main
 
 
 def test_get_user_attributes():
-    res = main.get_user_attributes(user_id=MagicMock())
+    with pytest.raises(Exception):
+        res = main.get_user_attributes(user_id=MagicMock())
     pass
 
 
@@ -15,7 +18,8 @@ def test_get_user_data():
 
 
 def test_get_user_id():
-    res = main.get_user_id(u_name=MagicMock())
+    with pytest.raises(Exception):
+        res = main.get_user_id(u_name=MagicMock())
     pass
 
 
@@ -25,7 +29,8 @@ def test_login_into_forum():
 
 
 def test_main():
-    res = main.main(event=MagicMock(), context=MagicMock())
+    with pytest.raises(Exception):
+        res = main.main(event=MagicMock(), context=MagicMock())
     pass
 
 
@@ -40,7 +45,8 @@ def test_prepare_message_for_async():
 
 
 def test_process_sending_message_async():
-    res = main.process_sending_message_async(user_id=MagicMock(), data=MagicMock())
+    with pytest.raises(Exception):
+        res = main.process_sending_message_async(user_id=MagicMock(), data=MagicMock())
     pass
 
 

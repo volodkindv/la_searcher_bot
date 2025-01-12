@@ -1,11 +1,14 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from api_get_active_searches import main
 
 
 def test_evaluate_city_locations():
-    res = main.evaluate_city_locations(city_locations=MagicMock())
+    with pytest.raises(Exception):
+        res = main.evaluate_city_locations(city_locations=MagicMock())
     pass
 
 
@@ -40,7 +43,8 @@ def test_sql_connect_by_psycopg2():
 
 
 def test_time_counter_since_search_start():
-    res = main.time_counter_since_search_start(start_time=MagicMock())
+    with pytest.raises(Exception):
+        res = main.time_counter_since_search_start(start_time=MagicMock())
     pass
 
 

@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from title_recognize import main
 
 

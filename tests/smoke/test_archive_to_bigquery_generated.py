@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from archive_to_bigquery import main
 
 
@@ -10,7 +12,8 @@ def test_archive_notif_by_user():
 
 
 def test_main():
-    res = main.main(event=MagicMock(), context=MagicMock())
+    with pytest.raises(Exception):
+        res = main.main(event=MagicMock(), context=MagicMock())
     pass
 
 

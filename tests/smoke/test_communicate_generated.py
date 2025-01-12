@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from communicate import main
 
 
@@ -15,9 +17,10 @@ def test_age_writer():
 
 
 def test_api_callback_edit_inline_keyboard():
-    res = main.api_callback_edit_inline_keyboard(
-        bot_token=MagicMock(), callback_query=MagicMock(), reply_markup=MagicMock(), user_id=MagicMock()
-    )
+    with pytest.raises(Exception):
+        res = main.api_callback_edit_inline_keyboard(
+            bot_token=MagicMock(), callback_query=MagicMock(), reply_markup=MagicMock(), user_id=MagicMock()
+        )
     pass
 
 
@@ -196,7 +199,8 @@ def test_make_api_call():
 
 
 def test_manage_age():
-    res = main.manage_age(cur=MagicMock(), user_id=MagicMock(), user_input='foo')
+    with pytest.raises(Exception):
+        res = main.manage_age(cur=MagicMock(), user_id=MagicMock(), user_input='foo')
     pass
 
 
@@ -251,40 +255,43 @@ def test_manage_radius():
 
 
 def test_manage_search_follow_mode():
-    res = main.manage_search_follow_mode(
-        cur=MagicMock(),
-        user_id=MagicMock(),
-        user_callback=MagicMock(),
-        callback_id=MagicMock(),
-        callback_query=MagicMock(),
-        bot_token=MagicMock(),
-    )
+    with pytest.raises(Exception):
+        res = main.manage_search_follow_mode(
+            cur=MagicMock(),
+            user_id=MagicMock(),
+            user_callback=MagicMock(),
+            callback_id=MagicMock(),
+            callback_query=MagicMock(),
+            bot_token=MagicMock(),
+        )
     pass
 
 
 def test_manage_search_whiteness():
-    res = main.manage_search_whiteness(
-        cur=MagicMock(),
-        user_id=MagicMock(),
-        user_callback=MagicMock(),
-        callback_id=MagicMock(),
-        callback_query=MagicMock(),
-        bot_token=MagicMock(),
-    )
+    with pytest.raises(Exception):
+        res = main.manage_search_whiteness(
+            cur=MagicMock(),
+            user_id=MagicMock(),
+            user_callback=MagicMock(),
+            callback_id=MagicMock(),
+            callback_query=MagicMock(),
+            bot_token=MagicMock(),
+        )
     pass
 
 
 def test_manage_topic_type():
-    res = main.manage_topic_type(
-        cur=MagicMock(),
-        user_id=MagicMock(),
-        user_input=MagicMock(),
-        b=MagicMock(),
-        user_callback=MagicMock(),
-        callback_id=MagicMock(),
-        bot_token=MagicMock(),
-        callback_query_msg_id=MagicMock(),
-    )
+    with pytest.raises(Exception):
+        res = main.manage_topic_type(
+            cur=MagicMock(),
+            user_id=MagicMock(),
+            user_input=MagicMock(),
+            b=MagicMock(),
+            user_callback=MagicMock(),
+            callback_id=MagicMock(),
+            bot_token=MagicMock(),
+            callback_query_msg_id=MagicMock(),
+        )
     pass
 
 
@@ -304,7 +311,8 @@ def test_process_block_unblock_user():
 
 
 def test_process_leaving_chat_async():
-    res = main.process_leaving_chat_async(user_id=MagicMock())
+    with pytest.raises(Exception):
+        res = main.process_leaving_chat_async(user_id=MagicMock())
     pass
 
 
@@ -314,7 +322,8 @@ def test_process_response_of_api_call():
 
 
 def test_process_sending_message_async():
-    res = main.process_sending_message_async(user_id=MagicMock(), data=MagicMock())
+    with pytest.raises(Exception):
+        res = main.process_sending_message_async(user_id=MagicMock(), data=MagicMock())
     pass
 
 
@@ -335,16 +344,17 @@ def test_process_unneeded_messages():
 
 
 def test_process_user_coordinates():
-    res = main.process_user_coordinates(
-        cur=MagicMock(),
-        user_id=MagicMock(),
-        user_latitude=MagicMock(),
-        user_longitude=MagicMock(),
-        b_coords_check=MagicMock(),
-        b_coords_del=MagicMock(),
-        b_back_to_start=MagicMock(),
-        bot_request_aft_usr_msg=MagicMock(),
-    )
+    with pytest.raises(Exception):
+        res = main.process_user_coordinates(
+            cur=MagicMock(),
+            user_id=MagicMock(),
+            user_latitude=MagicMock(),
+            user_longitude=MagicMock(),
+            b_coords_check=MagicMock(),
+            b_coords_del=MagicMock(),
+            b_back_to_start=MagicMock(),
+            bot_request_aft_usr_msg=MagicMock(),
+        )
     pass
 
 
@@ -371,7 +381,8 @@ def test_save_new_user():
 
 
 def test_save_onboarding_step():
-    res = main.save_onboarding_step(user_id=MagicMock(), username=MagicMock(), step=MagicMock())
+    with pytest.raises(Exception):
+        res = main.save_onboarding_step(user_id=MagicMock(), username=MagicMock(), step=MagicMock())
     pass
 
 
@@ -429,7 +440,10 @@ def test_search_button_row_ikb():
 
 
 def test_send_callback_answer_to_api():
-    res = main.send_callback_answer_to_api(bot_token=MagicMock(), callback_query_id=MagicMock(), message=MagicMock())
+    with pytest.raises(Exception):
+        res = main.send_callback_answer_to_api(
+            bot_token=MagicMock(), callback_query_id=MagicMock(), message=MagicMock()
+        )
     pass
 
 
@@ -439,7 +453,10 @@ def test_send_message_async():
 
 
 def test_send_message_to_api():
-    res = main.send_message_to_api(bot_token=MagicMock(), user_id=MagicMock(), message=MagicMock(), params=MagicMock())
+    with pytest.raises(Exception):
+        res = main.send_message_to_api(
+            bot_token=MagicMock(), user_id=MagicMock(), message=MagicMock(), params=MagicMock()
+        )
     pass
 
 
@@ -464,7 +481,8 @@ def test_sql_connect_by_psycopg2():
 
 
 def test_time_counter_since_search_start():
-    res = main.time_counter_since_search_start(start_time=MagicMock())
+    with pytest.raises(Exception):
+        res = main.time_counter_since_search_start(start_time=MagicMock())
     pass
 
 

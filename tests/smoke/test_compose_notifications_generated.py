@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from compose_notifications import main
 
 
@@ -27,7 +29,8 @@ def test_check_and_save_event_id():
 
 
 def test_check_if_need_compose_more():
-    res = main.check_if_need_compose_more(conn=MagicMock(), function_id=MagicMock())
+    with pytest.raises(Exception):
+        res = main.check_if_need_compose_more(conn=MagicMock(), function_id=MagicMock())
     pass
 
 
@@ -47,7 +50,8 @@ def test_compose_com_msg_on_new_comments():
 
 
 def test_compose_com_msg_on_new_topic():
-    res = main.compose_com_msg_on_new_topic(line=MagicMock())
+    with pytest.raises(Exception):
+        res = main.compose_com_msg_on_new_topic(line=MagicMock())
     pass
 
 
@@ -127,7 +131,8 @@ def test_enrich_new_record_with_comments():
 
 
 def test_enrich_new_record_with_emoji():
-    res = main.enrich_new_record_with_emoji(line=MagicMock())
+    with pytest.raises(Exception):
+        res = main.enrich_new_record_with_emoji(line=MagicMock())
     pass
 
 

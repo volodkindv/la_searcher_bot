@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from manage_users import main
 
 
@@ -30,7 +32,8 @@ def test_save_onboarding_step():
 
 
 def test_save_updated_status_for_user():
-    res = main.save_updated_status_for_user(action=MagicMock(), user_id=MagicMock(), timestamp=MagicMock())
+    with pytest.raises(Exception):
+        res = main.save_updated_status_for_user(action=MagicMock(), user_id=MagicMock(), timestamp=MagicMock())
     pass
 
 

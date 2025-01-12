@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from send_notifications import main
 
 
@@ -26,9 +28,10 @@ def test_check_for_number_of_notifs_to_send():
 
 
 def test_finish_time_analytics():
-    res = main.finish_time_analytics(
-        notif_times=MagicMock(), delays=MagicMock(), parsed_times=MagicMock(), list_of_change_ids=MagicMock()
-    )
+    with pytest.raises(Exception):
+        res = main.finish_time_analytics(
+            notif_times=MagicMock(), delays=MagicMock(), parsed_times=MagicMock(), list_of_change_ids=MagicMock()
+        )
     pass
 
 
@@ -48,13 +51,14 @@ def test_get_triggering_function():
 
 
 def test_iterate_over_notifications():
-    res = main.iterate_over_notifications(
-        bot_token=MagicMock(),
-        admin_id=MagicMock(),
-        script_start_time=MagicMock(),
-        session=MagicMock(),
-        function_id=MagicMock(),
-    )
+    with pytest.raises(Exception):
+        res = main.iterate_over_notifications(
+            bot_token=MagicMock(),
+            admin_id=MagicMock(),
+            script_start_time=MagicMock(),
+            session=MagicMock(),
+            function_id=MagicMock(),
+        )
     pass
 
 

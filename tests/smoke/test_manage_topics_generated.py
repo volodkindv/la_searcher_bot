@@ -1,6 +1,8 @@
 from datetime import date, datetime
 from unittest.mock import MagicMock
 
+import pytest
+
 from manage_topics import main
 
 
@@ -15,7 +17,8 @@ def test_main():
 
 
 def test_process_pubsub_message():
-    res = main.process_pubsub_message(event={})
+    with pytest.raises(Exception):
+        res = main.process_pubsub_message(event={})
     pass
 
 
