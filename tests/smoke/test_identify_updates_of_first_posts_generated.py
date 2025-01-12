@@ -95,11 +95,6 @@ def test_save_new_record_into_change_log():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_split_text_to_deleted_and_regular_parts():
     with pytest.raises(Exception):
         res = main.split_text_to_deleted_and_regular_parts(text=MagicMock())

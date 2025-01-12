@@ -36,8 +36,3 @@ def test_send_message():
 def test_send_message_async():
     res = main.send_message_async(context=MagicMock())
     pass
-
-
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass

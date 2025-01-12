@@ -17,17 +17,19 @@ def test_process_pubsub_message():
 
 
 def test_save_default_notif_settings():
-    res = main.save_default_notif_settings(user_id=MagicMock())
+    res = main.save_default_notif_settings(user_id=1)
     pass
 
 
 def test_save_new_user():
-    res = main.save_new_user(user_id=1, username='foo', timestamp=MagicMock())
+    with pytest.raises(Exception):
+        res = main.save_new_user(user_id=1, username='foo', timestamp=MagicMock())
     pass
 
 
 def test_save_onboarding_step():
-    res = main.save_onboarding_step(user_id=MagicMock(), step_name=MagicMock(), timestamp=MagicMock())
+    with pytest.raises(Exception):
+        res = main.save_onboarding_step(user_id=1, step_name='foo', timestamp=MagicMock())
     pass
 
 

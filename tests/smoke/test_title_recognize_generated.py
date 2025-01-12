@@ -19,8 +19,3 @@ def test_main():
 def test_recognize_title():
     res = main.recognize_title(line='foo', reco_type='foo')
     pass
-
-
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass

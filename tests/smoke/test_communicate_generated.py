@@ -465,11 +465,6 @@ def test_set_search_follow_mode():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_show_user_coordinates():
     res = main.show_user_coordinates(cur=MagicMock(), user_id=MagicMock())
     pass

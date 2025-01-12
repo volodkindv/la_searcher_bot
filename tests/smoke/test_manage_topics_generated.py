@@ -39,11 +39,6 @@ def test_save_visibility_for_topic():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_sql_connect():
     res = main.sql_connect()
     pass

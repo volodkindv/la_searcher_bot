@@ -50,7 +50,7 @@ def sql_connect_by_psycopg2():
     return conn_psy
 
 
-def save_onboarding_step(user_id, step_name, timestamp):
+def save_onboarding_step(user_id: int, step_name: str, timestamp: datetime) -> None:
     """save a step of onboarding"""
 
     dict_steps = {
@@ -165,7 +165,7 @@ def save_new_user(user_id: int, username: str, timestamp: datetime) -> None:
     return None
 
 
-def save_default_notif_settings(user_id):
+def save_default_notif_settings(user_id: int) -> None:
     """if the user is new – set the default notification categories in user_preferences table"""
 
     # set PSQL connection & cursor

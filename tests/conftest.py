@@ -19,7 +19,7 @@ load_dotenv()
 
 @pytest.fixture(scope='session')
 def use_real_db():
-    return False
+    return True
 
 
 @pytest.fixture(scope='session', autouse=True)

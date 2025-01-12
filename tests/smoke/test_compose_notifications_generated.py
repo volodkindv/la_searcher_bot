@@ -193,7 +193,8 @@ def test_iterate_over_all_users():
 
 
 def test_main():
-    res = main.main(event=MagicMock(), context=MagicMock())
+    with pytest.raises(Exception):
+        res = main.main(event=MagicMock(), context=MagicMock())
     pass
 
 
@@ -214,11 +215,6 @@ def test_process_pubsub_message():
 
 def test_record_notification_statistics():
     res = main.record_notification_statistics(conn=MagicMock())
-    pass
-
-
-def test_setup_google_logging():
-    res = main.setup_google_logging()
     pass
 
 

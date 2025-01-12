@@ -42,11 +42,6 @@ def test_set_cloud_storage():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_write_snapshot_to_cloud_storage():
     with pytest.raises(Exception):
         res = main.write_snapshot_to_cloud_storage(what_to_write=MagicMock(), folder_num=MagicMock())

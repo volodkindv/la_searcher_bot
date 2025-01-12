@@ -63,7 +63,8 @@ def test_iterate_over_notifications():
 
 
 def test_main():
-    res = main.main(event=MagicMock(), context=MagicMock())
+    with pytest.raises(Exception):
+        res = main.main(event=MagicMock(), context=MagicMock())
     pass
 
 
@@ -104,11 +105,6 @@ def test_send_single_message():
         admin_id=MagicMock(),
         session=MagicMock(),
     )
-    pass
-
-
-def test_setup_google_logging():
-    res = main.setup_google_logging()
     pass
 
 

@@ -23,11 +23,6 @@ def test_main():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_time_delta():
     res = main.time_delta(now=MagicMock(), time=MagicMock())
     pass

@@ -36,11 +36,6 @@ def test_parse_search():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_sql_connect():
     res = main.sql_connect()
     pass

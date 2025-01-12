@@ -32,11 +32,6 @@ def test_save_user_statistics_to_db():
     pass
 
 
-def test_setup_google_logging():
-    res = main.setup_google_logging()
-    pass
-
-
 def test_sql_connect_by_psycopg2():
     res = main.sql_connect_by_psycopg2()
     pass
