@@ -11,9 +11,6 @@ import re
 import time
 from datetime import datetime, timedelta, timezone
 
-import google.auth.transport.requests
-import google.cloud.logging
-import google.oauth2.id_token
 import requests
 import sqlalchemy
 from bs4 import BeautifulSoup, SoupStrainer  # noqa
@@ -21,8 +18,8 @@ from geopy.geocoders import Nominatim
 from google.cloud import storage
 from yandex_geocoder import Client, exceptions
 
-from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
+from _dependencies.misc import make_api_call, notify_admin
 
 setup_google_logging()
 
@@ -1201,24 +1198,6 @@ def parse_search_profile(search_num):
     logging.info('DBG.Profile:' + left_text)
 
     return left_text
-
-
-def make_api_call(function: str, data: dict) -> dict:
-    """makes an API call to another Google Cloud Function"""
-
-    # function we're turing to "title_recognize"
-    endpoint = f'https://europe-west3-lizaalert-bot-01.cloudfunctions.net/{function}'
-
-    # required magic for Google Cloud Functions Gen2 to invoke each other
-    audience = endpoint
-    auth_req = google.auth.transport.requests.Request()
-    id_token = google.oauth2.id_token.fetch_id_token(auth_req, audience)
-    headers = {'Authorization': f'Bearer {id_token}', 'Content-Type': 'application/json'}
-
-    r = requests.post(endpoint, json=data, headers=headers)
-    content = r.json()
-
-    return content
 
 
 def parse_one_folder(db, folder_id):

@@ -9,7 +9,7 @@ def test_evaluate_city_locations():
 
 
 def test_get_user_data_from_db():
-    res = main.get_user_data_from_db(user_id=MagicMock())
+    res = main.get_user_data_from_db(user_id=1)
     pass
 
 
@@ -19,7 +19,7 @@ def test_main():
 
 
 def test_save_user_statistics_to_db():
-    res = main.save_user_statistics_to_db(user_id=MagicMock(), response=MagicMock())
+    res = main.save_user_statistics_to_db(user_id=1, response=False)
     pass
 
 

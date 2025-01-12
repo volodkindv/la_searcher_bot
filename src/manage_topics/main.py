@@ -6,8 +6,8 @@ import random
 
 import sqlalchemy
 
-from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
+from _dependencies.misc import notify_admin
 
 setup_google_logging()
 

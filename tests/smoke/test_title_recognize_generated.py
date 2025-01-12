@@ -14,7 +14,7 @@ def test_main():
 
 
 def test_recognize_title():
-    res = main.recognize_title(line=MagicMock(), reco_type=MagicMock())
+    res = main.recognize_title(line='foo', reco_type='foo')
     pass
 
 

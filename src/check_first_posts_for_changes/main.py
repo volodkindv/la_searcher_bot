@@ -9,14 +9,11 @@ import hashlib
 import logging
 import re
 
-import google.auth.transport.requests
-import google.cloud.logging
-import google.oauth2.id_token
 import requests
 import sqlalchemy  # idea for optimization – to move to psycopg2
 
-from _dependencies.admin import notify_admin
 from _dependencies.funcs import get_secrets, publish_to_pubsub, setup_google_logging
+from _dependencies.misc import make_api_call, notify_admin
 
 setup_google_logging()
 
@@ -203,24 +200,6 @@ def parse_search(search_num):
         site_unavailable = True
 
     return content, site_unavailable
-
-
-def make_api_call(function: str, data: dict) -> dict:
-    """makes an API call to another Google Cloud Function"""
-
-    # function we're turing to "title_recognize"
-    endpoint = f'https://europe-west3-lizaalert-bot-01.cloudfunctions.net/{function}'
-
-    # required magic for Google Cloud Functions Gen2 to invoke each other
-    audience = endpoint
-    auth_req = google.auth.transport.requests.Request()
-    id_token = google.oauth2.id_token.fetch_id_token(auth_req, audience)
-    headers = {'Authorization': f'Bearer {id_token}', 'Content-Type': 'application/json'}
-
-    r = requests.post(endpoint, json=data, headers=headers)
-    content = r.json()
-
-    return content
 
 
 def get_status_from_content_and_send_to_topic_management(topic_id, act_content):

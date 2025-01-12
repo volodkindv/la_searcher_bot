@@ -72,7 +72,7 @@ def test_compose_msg_on_all_last_searches_ikb():
 
 
 def test_compose_msg_on_user_setting_fullness():
-    res = main.compose_msg_on_user_setting_fullness(cur=MagicMock(), user_id=MagicMock())
+    res = main.compose_msg_on_user_setting_fullness(cur=MagicMock(), user_id=1)
     pass
 
 
@@ -82,7 +82,7 @@ def test_compose_user_preferences_message():
 
 
 def test_delete_last_user_inline_dialogue():
-    res = main.delete_last_user_inline_dialogue(cur=MagicMock(), user_id=MagicMock())
+    res = main.delete_last_user_inline_dialogue(cur=MagicMock(), user_id=1)
     pass
 
 
@@ -135,7 +135,7 @@ def test_get_last_bot_msg():
 
 
 def test_get_last_user_inline_dialogue():
-    res = main.get_last_user_inline_dialogue(cur=MagicMock(), user_id=MagicMock())
+    res = main.get_last_user_inline_dialogue(cur=MagicMock(), user_id=1)
     pass
 
 
@@ -145,7 +145,7 @@ def test_get_param_if_exists():
 
 
 def test_get_search_follow_mode():
-    res = main.get_search_follow_mode(cur=MagicMock(), user_id=MagicMock())
+    res = main.get_search_follow_mode(cur=MagicMock(), user_id=1)
     pass
 
 
@@ -190,9 +190,7 @@ def test_main():
 
 
 def test_make_api_call():
-    res = main.make_api_call(
-        method=MagicMock(), bot_api_token=MagicMock(), params=MagicMock(), call_context=MagicMock()
-    )
+    res = main.make_api_call(method='foo', bot_api_token='foo', params={}, call_context=MagicMock())
     pass
 
 
@@ -362,7 +360,7 @@ def test_save_bot_reply_to_user():
 
 
 def test_save_last_user_inline_dialogue():
-    res = main.save_last_user_inline_dialogue(cur=MagicMock(), user_id=MagicMock(), message_id=MagicMock())
+    res = main.save_last_user_inline_dialogue(cur=MagicMock(), user_id=1, message_id=1)
     pass
 
 
@@ -445,7 +443,7 @@ def test_send_message_to_api():
 
 
 def test_set_search_follow_mode():
-    res = main.set_search_follow_mode(cur=MagicMock(), user_id=MagicMock(), new_value=MagicMock())
+    res = main.set_search_follow_mode(cur=MagicMock(), user_id=1, new_value=MagicMock())
     pass
 
 

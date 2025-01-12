@@ -1,5 +1,6 @@
 from unittest.mock import MagicMock
 
+import _dependencies.misc
 from identify_updates_of_topics import main
 
 
@@ -19,7 +20,7 @@ def test_get_coordinates():
 
 
 def test_get_last_api_call_time_from_psql():
-    res = main.get_last_api_call_time_from_psql(db=MagicMock(), geocoder=MagicMock())
+    res = main.get_last_api_call_time_from_psql(db=MagicMock(), geocoder='foo')
     pass
 
 
@@ -34,7 +35,7 @@ def test_main():
 
 
 def test_make_api_call():
-    res = main.make_api_call(function=MagicMock(), data=MagicMock())
+    res = _dependencies.misc.make_api_call(function='foo', data={})
     pass
 
 
@@ -79,7 +80,7 @@ def test_profile_get_type_of_activity():
 
 
 def test_rate_limit_for_api():
-    res = main.rate_limit_for_api(db=MagicMock(), geocoder=MagicMock())
+    res = main.rate_limit_for_api(db=MagicMock(), geocoder='foo')
     pass
 
 
@@ -101,7 +102,7 @@ def test_save_function_into_register():
 
 
 def test_save_last_api_call_time_to_psql():
-    res = main.save_last_api_call_time_to_psql(db=MagicMock(), geocoder=MagicMock())
+    res = main.save_last_api_call_time_to_psql(db=MagicMock(), geocoder='foo')
     pass
 
 

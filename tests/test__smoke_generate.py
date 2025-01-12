@@ -7,7 +7,7 @@ import pytest
 # @pytest.mark.skip(reason='Использовалось для генерации тест-кейсов')
 class TestSmokeTestGeneration:
     def test_generate_all(self):
-        """paste here output of test_generate_all_cases and run to generate smoke test templates"""
+        """generate all smoke testcases"""
         import importlib
 
         dir_names = [x.name for x in Path('src').glob('*')]
@@ -22,6 +22,13 @@ class TestSmokeTestGeneration:
                 dir_name,
                 f'tests/smoke/test_{dir_name}_generated.py',
             )
+
+    def test_generate_signature(self):
+        def example(v1: str, v2: int, v3=None):
+            pass
+
+        signature = self._generate_call_signature(example)
+        assert signature == "v1='foo', v2=1, v3=MagicMock(v3=None)"
 
     def test_generate_cases_example(self):
         """generate testcases for single module"""
@@ -52,8 +59,7 @@ def test_{func_name}():
             if not inspect.isfunction(member):
                 continue
 
-            signature = inspect.signature(member)
-            args_str = ', '.join([f'{arg}=MagicMock()' for arg in signature.parameters])
+            args_str = self._generate_call_signature(member)
 
             testcase = template.format(module_name=module_name, func_name=member_name, args=args_str)
             testcases.append(testcase)
@@ -63,3 +69,28 @@ def test_{func_name}():
 
         Path(res_filename).write_text('\n'.join(testcases))
         return '\n'.join(testcases)
+
+    def _generate_call_signature(self, member):
+        signature = inspect.signature(member)
+
+        args = []
+        for param_name in signature.parameters:
+            arg_value = self._get_default_arg_value(signature.parameters[param_name])
+            args.append(f'{param_name}={arg_value}')
+
+        args_str = ', '.join(args)
+        return args_str
+
+    def _get_default_arg_value(self, param) -> str:
+        if param._annotation is str:
+            return "'foo'"
+        elif param._annotation is int:
+            return '1'
+        elif param._annotation is list:
+            return '[]'
+        elif param._annotation is dict:
+            return '{}'
+        elif param._annotation is bool:
+            return 'False'
+        else:
+            return 'MagicMock()'

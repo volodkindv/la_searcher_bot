@@ -24,7 +24,7 @@ def test_main():
 
 
 def test_make_api_call():
-    res = main.make_api_call(function=MagicMock(), data=MagicMock())
+    res = main.make_api_call(function='foo', data={})
     pass
 
 
