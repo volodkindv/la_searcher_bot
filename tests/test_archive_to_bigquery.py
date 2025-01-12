@@ -6,6 +6,7 @@ from telegram import Bot
 from telegram.ext import ExtBot
 
 from tests.common import get_event_with_data
+from archive_to_bigquery.main import main
 
 
 @pytest.fixture
@@ -18,7 +19,6 @@ def patch_big_query():
 
 
 def test_main(patch_big_query):
-    from archive_to_bigquery.main import main
 
     event = get_event_with_data(
         {

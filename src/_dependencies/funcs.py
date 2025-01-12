@@ -8,6 +8,7 @@ from typing import Any
 import google.cloud.logging
 from google.cloud import pubsub_v1, secretmanager
 
+# TODO describe common deps in UV
 
 @lru_cache
 def get_secret_manager_client() -> secretmanager.SecretManagerServiceClient:
