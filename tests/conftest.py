@@ -14,18 +14,21 @@ from sqlalchemy import create_engine as create_engine_original
 
 from tests.common import get_config
 
-USE_REAL_DB = False
-
 load_dotenv()
 
 
+@pytest.fixture(scope='session')
+def use_real_db():
+    return False
+
+
 @pytest.fixture(scope='session', autouse=True)
-def create_test_db():
+def create_test_db(use_real_db: bool):
     """
     Automatically recreate test database schema for using in tests
     Be careful: all data in database would be deleted!
     """
-    if not USE_REAL_DB:
+    if not use_real_db:
         return
 
     from tests.tools import init_testing_db
@@ -34,7 +37,7 @@ def create_test_db():
 
 
 @pytest.fixture(autouse=True)
-def patch_psycopg2_connection(create_test_db):
+def patch_psycopg2_connection(create_test_db, use_real_db: bool):
     """Connect to local DB"""
 
     def psycopg2_connection_wrapped(*args, **kwargs):
@@ -48,13 +51,13 @@ def patch_psycopg2_connection(create_test_db):
             password=config.cloud_postgres_password,
         )
 
-    mocked_connection = psycopg2_connection_wrapped if USE_REAL_DB else MagicMock()
+    mocked_connection = psycopg2_connection_wrapped if use_real_db else MagicMock()
     with patch.object(psycopg2, 'connect', mocked_connection):
         yield
 
 
 @pytest.fixture(autouse=True)
-def patch_sqlalchemy_connection_url(create_test_db):
+def patch_sqlalchemy_connection_url(create_test_db, use_real_db: bool):
     """Connect to local DB"""
 
     def sqlalchemy_conn_url_wrapped(*args, **kwargs):
@@ -71,7 +74,7 @@ def patch_sqlalchemy_connection_url(create_test_db):
 
         return create_engine_original(url)
 
-    mocked_connection = sqlalchemy_conn_url_wrapped if USE_REAL_DB else MagicMock()
+    mocked_connection = sqlalchemy_conn_url_wrapped if use_real_db else MagicMock()
     with patch.object(sqlalchemy, 'create_engine', mocked_connection):
         yield
 
