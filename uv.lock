@@ -836,6 +836,7 @@ dependencies = [
     { name = "google-cloud-logging" },
     { name = "google-cloud-pubsub" },
     { name = "google-cloud-secret-manager" },
+    { name = "nest-asyncio" },
     { name = "pydantic-settings" },
 ]
 
@@ -1017,6 +1018,7 @@ requires-dist = [
     { name = "lxml", marker = "extra == 'user-provide-info'", specifier = "==4.9.1" },
     { name = "natasha", marker = "extra == 'identify-updates-of-topics'", specifier = "==1.4.0" },
     { name = "natasha", marker = "extra == 'title-recognize'", specifier = "==1.4.0" },
+    { name = "nest-asyncio" },
     { name = "polyfactory", marker = "extra == 'develop'", specifier = ">=2.18" },
     { name = "psycopg2-binary", marker = "extra == 'api-get-active-searches'", specifier = "==2.9.5" },
     { name = "psycopg2-binary", marker = "extra == 'archive-notifications'", specifier = "==2.9.5" },
@@ -1185,6 +1187,15 @@ dependencies = [
 sdist = { url = "https://files.pythonhosted.org/packages/7d/52/2469e9323708e367c6c2fea1c7964e51ab4b0cda782251df07fe22c88ea3/navec-0.10.0.tar.gz", hash = "sha256:4f23474b1c279af6c605f84e7873e87c47ca58b0c538a3f9d30d90c609c9fd21", size = 79665707 }
 wheels = [
     { url = "https://files.pythonhosted.org/packages/bc/c1/771ec5565f0ce24874d7fd325b429f9caa80517a40d2e4ce5705120591f3/navec-0.10.0-py3-none-any.whl", hash = "sha256:c4e24519ed5af3f6984f763c61c3a281b2923b59c72b88ea8c1c11aa81265e18", size = 23309 },
+]
+
+[[package]]
+name = "nest-asyncio"
+version = "1.6.0"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/83/f8/51569ac65d696c8ecbee95938f89d4abf00f47d58d48f6fbabfe8f0baefe/nest_asyncio-1.6.0.tar.gz", hash = "sha256:6f172d5449aca15afd6c646851f4e31e02c598d553a667e38cafa997cfec55fe", size = 7418 }
+wheels = [
+    { url = "https://files.pythonhosted.org/packages/a0/c4/c2971a3ba4c6103a3d10c4b0f24f461ddc027f0f09763220cf35ca1401b3/nest_asyncio-1.6.0-py3-none-any.whl", hash = "sha256:87af6efd6b5e897c81050477ef65c62e2b2f35d51703cae01aff2905b1852e1c", size = 5195 },
 ]
 
 [[package]]
