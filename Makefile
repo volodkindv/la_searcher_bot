@@ -18,6 +18,9 @@ lint-check:
 	uv run ruff format src tests --check
 	uv run ruff check src tests --select I
 
+mypy:
+	uv run mypy src/
+
 requirements:
 	for d in $$(ls -1 src | grep -E ${SRC_FUNCTIONS_REGEX}); do \
 		uv export --extra $$d --no-hashes > src/$$d/requirements.txt; \

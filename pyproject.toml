@@ -24,7 +24,11 @@ develop = [
     "ruff>=0.8",
     "uv>=0.5.15",
     "pytest-xdist==3.*",
-    "pyannotate==1.2.*"
+    "pyannotate==1.2.*",
+
+    "types-beautifulsoup4",
+    "types-psycopg2",
+    "types-python-dateutil",
 ]
 
 api_get_active_searches = [
@@ -169,3 +173,13 @@ format.quote-style = 'single'
 
 [tool.coverage.run]
 omit = ["*/tests/*"]
+
+[tool.mypy]
+disallow_untyped_defs = true
+exclude = ["tests","env",  "venv"]
+explicit_package_bases = true
+ignore_missing_imports = true
+install_types = true
+# no_implicit_optional = true
+non_interactive = true
+# plugins = ["mypy_django_plugin.main", "pydantic.mypy"]

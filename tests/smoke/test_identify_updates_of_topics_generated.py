@@ -9,11 +9,6 @@ def test_define_start_time_of_search():
     pass
 
 
-def test_generate_random_function_id():
-    res = run_smoke(main.generate_random_function_id)
-    pass
-
-
 def test_get_coordinates():
     res = run_smoke(main.get_coordinates)
     pass
@@ -59,12 +54,6 @@ def test_parse_search_profile():
 
 def test_process_one_folder():
     res = run_smoke(main.process_one_folder)
-    pass
-
-
-def test_process_pubsub_message():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.process_pubsub_message)
     pass
 
 

@@ -1,10 +1,10 @@
-import asyncio
 import base64
 import datetime
 import logging
 import re
 import urllib.parse
 import urllib.request
+from dataclasses import dataclass
 from time import sleep
 from typing import Any, Dict, Optional
 
@@ -14,94 +14,27 @@ from telegram import Bot, ReplyKeyboardMarkup
 from telegram.ext import Application, ContextTypes
 
 from _dependencies.commons import get_app_config, setup_google_logging, sql_connect_by_psycopg2
+from _dependencies.misc import process_sending_message_async
 
 setup_google_logging()
 
 
 session = requests.Session()
-cur = None
-conn_psy = None
 
 
+@dataclass
 class ForumUser:
-    def __init__(
-        self,
-        user_id=None,
-        username=None,
-        callsign=None,
-        region=None,
-        phone=None,
-        auto_num=None,
-        age=None,
-        sex=None,
-        reg_date=None,
-        firstname=None,
-        lastname=None,
-    ):
-        self.user_id = user_id
-        self.username = username
-        self.callsign = callsign
-        self.region = region
-        self.phone = phone
-        self.auto_num = auto_num
-        self.age = age
-        self.sex = sex
-        self.reg_date = reg_date
-        self.firstname = firstname
-        self.lastname = lastname
-
-    def __str__(self):
-        return str(
-            [
-                self.user_id,
-                self.username,
-                self.firstname,
-                self.lastname,
-                self.callsign,
-                self.region,
-                self.phone,
-                self.auto_num,
-                self.age,
-                self.sex,
-                self.reg_date,
-            ]
-        )
-
-
-def sql_connect_by_psycopg2_with_globals():
-    # TODO remove globals
-    global cur
-    global conn_psy
-
-    conn_psy = sql_connect_by_psycopg2()
-    cur = conn_psy.cursor()
-
-
-async def send_message_async(context: ContextTypes.DEFAULT_TYPE):
-    await context.bot.send_message(chat_id=context.job.chat_id, **context.job.data)
-
-    return None
-
-
-async def prepare_message_for_async(user_id, data):
-    bot_token = get_app_config().bot_api_token__prod
-    application = Application.builder().token(bot_token).build()
-    job_queue = application.job_queue
-    job_queue.run_once(send_message_async, 0, data=data, chat_id=user_id)
-
-    async with application:
-        await application.initialize()
-        await application.start()
-        await application.stop()
-        await application.shutdown()
-
-    return 'ok'
-
-
-def process_sending_message_async(user_id, data) -> None:
-    asyncio.run(prepare_message_for_async(user_id, data))
-
-    return None
+    user_id: Any = None
+    username: Any = None
+    callsign: Any = None
+    region: Any = None
+    phone: Any = None
+    auto_num: Any = None
+    age: Any = None
+    sex: Any = None
+    reg_date: Any = None
+    firstname: Any = None
+    lastname: Any = None
 
 
 def login_into_forum(forum_bot_password: str) -> None:
@@ -148,7 +81,7 @@ def login_into_forum(forum_bot_password: str) -> None:
     return None
 
 
-def get_user_id(u_name):
+def get_user_id(u_name: str) -> int:
     """get user_id from forum"""
 
     user_id = 0
@@ -191,10 +124,10 @@ def get_user_attributes(user_id: str):
     return block_with_user_attr
 
 
-def get_user_data(data):
+def get_user_data(data) -> ForumUser:
     """aggregates User Profile from forums' data"""
 
-    global user
+    user = ForumUser()
 
     dict = {
         'age': 'Возраст:',
@@ -213,7 +146,7 @@ def get_user_data(data):
             print(attr, 'is not defined')
             logging.info(e1)
 
-    return None
+    return user
 
 
 def match_user_region_from_forum_to_bot(forum_region):
@@ -288,9 +221,8 @@ def match_user_region_from_forum_to_bot(forum_region):
 def main(event: Dict[str, bytes], context: str) -> None:
     """main function triggered from communicate script via pyb/sub"""
 
-    global user
-    global cur
-    global conn_psy
+    conn = sql_connect_by_psycopg2()
+    cur = conn.cursor()
 
     user = ForumUser()
 
@@ -308,20 +240,17 @@ def main(event: Dict[str, bytes], context: str) -> None:
     # log in to forum
     bot_forum_pass = get_app_config().forum_bot_password
     login_into_forum(bot_forum_pass)
-
-    user_found = False
-
+    user = None
     if message_in_ascii:
         f_usr_id = get_user_id(f_username)
 
         if f_usr_id != 0:
             block_of_user_data = get_user_attributes(f_usr_id)
-            user_found = True
 
             if block_of_user_data:
-                get_user_data(block_of_user_data)
+                user = get_user_data(block_of_user_data)
 
-    if user_found:
+    if user:
         bot_message = 'Посмотрите, Бот нашел следующий аккаунт на форуме, это Вы?\n'
         bot_message += 'username: ' + f_username + ', '
         if user.callsign:
@@ -338,11 +267,9 @@ def main(event: Dict[str, bytes], context: str) -> None:
 
         keyboard = [['да, это я'], ['нет, это не я'], ['в начало']]
 
-        sql_connect_by_psycopg2_with_globals()
-
         # Delete previous records for this user
         cur.execute("""DELETE FROM user_forum_attributes WHERE user_id=%s;""", (tg_user_id,))
-        conn_psy.commit()
+        conn.commit()
 
         # Add new record for this user
         cur.execute(
@@ -365,10 +292,10 @@ def main(event: Dict[str, bytes], context: str) -> None:
                 user.reg_date,
             ),
         )
-        conn_psy.commit()
+        conn.commit()
 
         cur.execute("""SELECT forum_folder_num FROM user_regional_preferences WHERE user_id=%s""", (tg_user_id,))
-        conn_psy.commit()
+        conn.commit()
         user_has_region_set = True if cur.fetchone() else False
         logging.info(f'user_has_region_set = {user_has_region_set}')
 
@@ -389,18 +316,16 @@ def main(event: Dict[str, bytes], context: str) -> None:
         keyboard = [['в начало']]
         bot_request_aft_usr_msg = 'input_of_forum_username'
 
-        sql_connect_by_psycopg2_with_globals()
-
         try:
             cur.execute("""DELETE FROM msg_from_bot WHERE user_id=%s;""", (tg_user_id,))
-            conn_psy.commit()
+            conn.commit()
             cur.execute(
                 """
                 INSERT INTO msg_from_bot (user_id, time, msg_type) values (%s, %s, %s);
                 """,
                 (tg_user_id, datetime.datetime.now(), bot_request_aft_usr_msg),
             )
-            conn_psy.commit()
+            conn.commit()
 
         except Exception as e:
             logging.info('failed to update the last saved message from bot')
@@ -416,9 +341,7 @@ def main(event: Dict[str, bytes], context: str) -> None:
             """INSERT INTO dialogs (user_id, author, timestamp, message_text) values (%s, %s, %s, %s);""",
             (tg_user_id, 'bot', datetime.datetime.now(), bot_message),
         )
-        conn_psy.commit()
+        conn.commit()
 
     cur.close()
-    conn_psy.close()
-
-    return None
+    conn.close()

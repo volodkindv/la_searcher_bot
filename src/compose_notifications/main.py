@@ -1,25 +1,30 @@
 """compose and save all the text / location messages, then initiate sending via pub-sub"""
 
 import ast
-import base64
 import datetime
-import json
 import logging
 import math
-import random
 import re
 from typing import Any, List, Optional, Tuple
 
 import sqlalchemy
 from sqlalchemy.engine.base import Connection
 
+from _dependencies.cloud_func_parallel_guard import check_and_save_event_id
 from _dependencies.commons import Topics, get_app_config, publish_to_pubsub, setup_google_logging, sqlalchemy_get_pool
-from _dependencies.misc import notify_admin
+from _dependencies.misc import (
+    age_writer,
+    generate_random_function_id,
+    get_triggering_function,
+    notify_admin,
+    process_pubsub_message_v2,
+)
 
 setup_google_logging()
 
 
 WINDOW_FOR_NOTIFICATIONS_DAYS = 60
+INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS = 130
 
 coord_format = '{0:.5f}'
 stat_list_of_recipients = []  # list of users who received notification on new search
@@ -282,25 +287,6 @@ def sql_connect() -> sqlalchemy.engine.Engine:
     return sqlalchemy_get_pool(5, 60)
 
 
-def age_writer(age):
-    """compose an age string with the right form of years in Russian"""
-
-    if age:
-        a = age // 100
-        b = (age - a * 100) // 10
-        c = age - a * 100 - b * 10
-        if c == 1 and b != 1:
-            wording = str(age) + ' год'
-        elif (c == 2 or c == 3 or c == 4) and b != 1:
-            wording = str(age) + ' года'
-        else:
-            wording = str(age) + ' лет'
-    else:
-        wording = ''
-
-    return wording
-
-
 def define_family_name(title_string: str, predefined_fam_name: str | None) -> str:
     """define family name if it's not available as A SEPARATE FIELD in Searches table"""
 
@@ -388,28 +374,6 @@ def define_dist_and_dir_to_search(search_lat, search_lon, user_let, user_lon):
     direction = calc_direction(lat1, lon1, lat2, lon2)
 
     return dist, direction
-
-
-def process_pubsub_message(event):
-    """get the readable message from incoming pub/sub call"""
-
-    # receive message text from pub/sub
-    try:
-        if 'data' in event:
-            received_message_from_pubsub = base64.b64decode(event['data']).decode('utf-8')
-            encoded_to_ascii = eval(received_message_from_pubsub)
-            data_in_ascii = encoded_to_ascii['data']
-            message_in_ascii = data_in_ascii['message']
-        else:
-            message_in_ascii = 'ERROR: I cannot read message from pub/sub'
-
-    except Exception as e:
-        message_in_ascii = 'ERROR: I cannot read message from pub/sub'
-        logging.exception(e)
-
-    logging.info(f'received message from pub/sub: {message_in_ascii}')
-
-    return message_in_ascii
 
 
 def compose_new_records_from_change_log(conn: Connection) -> LineInChangeLog:
@@ -1910,93 +1874,7 @@ def mark_new_comments_as_processed(conn, record):
     return None
 
 
-def check_and_save_event_id(context, event, conn, new_record, function_id, triggered_by_func_id):
-    """Work with PSQL table functions_registry. Goal of the table & function is to avoid parallel work of
-    two compose_notifications functions. Executed in the beginning and in the end of compose_notifications function"""
-
-    def check_if_other_functions_are_working() -> bool:
-        # TODO DOUBLE
-        """Check in PSQL in there's the same function 'compose_notifications' working in parallel"""
-
-        sql_text_psy = sqlalchemy.text("""
-                        SELECT event_id
-                        FROM functions_registry
-                        WHERE
-                            time_start > NOW() - interval '130 seconds' AND
-                            time_finish IS NULL AND
-                            cloud_function_name  = 'compose_notifications'
-                        /*action='check_if_there_is_parallel_compose_function' */;""")
-
-        lines = conn.execute(sql_text_psy).fetchone()
-
-        parallel_functions = True if lines else False
-
-        return parallel_functions
-
-    def record_start_of_function(event_num, function_num: int) -> None:
-        # TODO DOUBLE
-        """Record into PSQL that this function started working (id = id of the respective pub/sub event)"""
-
-        sql_text_psy = sqlalchemy.text("""INSERT INTO functions_registry
-                                          (event_id, time_start, cloud_function_name, function_id, triggered_by_func_id)
-                                          VALUES (:a, :b, :c, :d, :e)
-                                          /*action='save_start_of_compose_function' */;""")
-
-        conn.execute(
-            sql_text_psy,
-            a=event_num,
-            b=datetime.datetime.now(),
-            c='compose_notifications',
-            d=function_num,
-            e=triggered_by_func_id,
-        )
-        logging.info(f'function was triggered by event {event_num}')
-
-        return None
-
-    def record_finish_of_function(event_num, params_json):
-        # TODO DOUBLE
-        """Record into PSQL that this function finished working (id = id of the respective pub/sub event)"""
-
-        sql_text_psy = sqlalchemy.text("""UPDATE functions_registry
-                                          SET time_finish = :a, params = :c
-                                          WHERE event_id = :b
-                                          /*action='save_finish_of_compose_function' */;""")
-
-        conn.execute(sql_text_psy, a=datetime.datetime.now(), b=event_num, c=params_json)
-
-        return None
-
-    if not context or not event:
-        return False
-
-    try:
-        event_id = context.event_id
-    except Exception as e:  # noqa
-        return False
-
-    # if this functions is triggered in the very beginning of the Google Cloud Function execution
-    if event == 'start':
-        if check_if_other_functions_are_working():
-            record_start_of_function(event_id, function_id)
-            return True
-
-        record_start_of_function(event_id, function_id)
-        return False
-
-    # if this functions is triggered in the very end of the Google Cloud Function execution
-    elif event == 'finish':
-        json_of_params = None
-        if new_record:
-            # FIXME -- temp try. the content is not temp
-            try:
-                list_of_change_log_ids = [new_record.change_id]
-                json_of_params = json.dumps({'ch_id': list_of_change_log_ids})
-            except Exception as e:  # noqa
-                logging.exception(e)
-            # FIXME ^^^
-        record_finish_of_function(event_id, json_of_params)
-        return False
+FUNC_NAME = 'compose_notifications'
 
 
 def check_if_need_compose_more(conn, function_id: int):
@@ -2008,6 +1886,7 @@ def check_if_need_compose_more(conn, function_id: int):
     if check:
         logging.info('we checked – there is still something to compose: re-initiating [compose_notification]')
         message_for_pubsub = {'triggered_by_func_id': function_id, 'text': 're-run from same script'}
+        # TODO remove recursion if possible
         publish_to_pubsub(Topics.topic_for_notification, message_for_pubsub)
     else:
         logging.info('we checked – there is nothing to compose: we are not re-initiating [compose_notification]')
@@ -2015,38 +1894,7 @@ def check_if_need_compose_more(conn, function_id: int):
     return None
 
 
-def generate_random_function_id() -> int:
-    """generates a random ID for every function – to track all function dependencies (no built-in ID in GCF)"""
-
-    random_id = random.randint(100000000000, 999999999999)
-
-    return random_id
-
-
-def get_triggering_function(message_from_pubsub: str):
-    """get a function_id of the function, which triggered this function (if available)"""
-
-    triggered_by_func_id = None
-    try:
-        if (
-            message_from_pubsub
-            and isinstance(message_from_pubsub, dict)
-            and 'triggered_by_func_id' in message_from_pubsub.keys()
-        ):
-            triggered_by_func_id = message_from_pubsub['triggered_by_func_id']
-
-    except Exception as e:
-        logging.exception(e)
-
-    if triggered_by_func_id:
-        logging.info(f'this function is triggered by func_id {triggered_by_func_id}')
-    else:
-        logging.info('triggering func_id was not determined')
-
-    return triggered_by_func_id
-
-
-def delete_ended_search_following(conn: Connection, new_record):  # issue425
+def delete_ended_search_following(conn: Connection, new_record: LineInChangeLog) -> None:  # issue425
     ### Delete from user_pref_search_whitelist if the search goes to one of ending statuses
 
     if new_record.change_type == 1 and new_record.status in ['Завершен', 'НЖ', 'НП', 'Найден']:
@@ -2064,17 +1912,31 @@ def main(event, context):  # noqa
     analytics_start_of_func = datetime.datetime.now()
 
     function_id = generate_random_function_id()
-    message_from_pubsub = process_pubsub_message(event)
+    message_from_pubsub = process_pubsub_message_v2(event)
     triggered_by_func_id = get_triggering_function(message_from_pubsub)
 
     pool = sql_connect()
     with pool.connect() as conn:
         there_is_function_working_in_parallel = check_and_save_event_id(
-            context, 'start', conn, None, function_id, triggered_by_func_id
+            context,
+            'start',
+            function_id,
+            None,
+            triggered_by_func_id,
+            FUNC_NAME,
+            INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS,
         )
         if there_is_function_working_in_parallel:
             logging.info('function execution stopped due to parallel run with another function')
-            check_and_save_event_id(context, 'finish', conn, None, function_id, triggered_by_func_id)
+            check_and_save_event_id(
+                context,
+                'finish',
+                function_id,
+                None,
+                triggered_by_func_id,
+                FUNC_NAME,
+                INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS,
+            )
             logging.info('script finished')
             conn.close()
             pool.dispose()
@@ -2121,7 +1983,15 @@ def main(event, context):  # noqa
             record_notification_statistics(conn)
 
         check_if_need_compose_more(conn, function_id)
-        check_and_save_event_id(context, 'finish', conn, new_record, function_id, triggered_by_func_id)
+        check_and_save_event_id(
+            context,
+            'finish',
+            function_id,
+            new_record,
+            triggered_by_func_id,
+            FUNC_NAME,
+            INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS,
+        )
 
         analytics_finish = datetime.datetime.now()
         if new_record:

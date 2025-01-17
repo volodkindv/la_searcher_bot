@@ -9,16 +9,6 @@ def test_add_tel_link():
     pass
 
 
-def test_age_writer():
-    res = run_smoke(main.age_writer)
-    pass
-
-
-def test_check_and_save_event_id():
-    res = run_smoke(main.check_and_save_event_id)
-    pass
-
-
 def test_check_if_need_compose_more():
     res = run_smoke(main.check_if_need_compose_more)
     pass
@@ -136,11 +126,6 @@ def test_enrich_users_list_with_radius():
     pass
 
 
-def test_generate_random_function_id():
-    res = run_smoke(main.generate_random_function_id)
-    pass
-
-
 def test_generate_yandex_maps_place_link2():
     res = run_smoke(main.generate_yandex_maps_place_link2)
     pass
@@ -153,11 +138,6 @@ def test_get_coords_from_list():
 
 def test_get_list_of_admins_and_testers():
     res = run_smoke(main.get_list_of_admins_and_testers)
-    pass
-
-
-def test_get_triggering_function():
-    res = run_smoke(main.get_triggering_function)
     pass
 
 
@@ -179,11 +159,6 @@ def test_mark_new_comments_as_processed():
 
 def test_mark_new_record_as_processed():
     res = run_smoke(main.mark_new_record_as_processed)
-    pass
-
-
-def test_process_pubsub_message():
-    res = run_smoke(main.process_pubsub_message)
     pass
 
 

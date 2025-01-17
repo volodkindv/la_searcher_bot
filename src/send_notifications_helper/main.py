@@ -4,14 +4,13 @@ import ast
 import datetime
 import json
 import logging
-import random
 import time
-import urllib.request
 from typing import Any, List, Optional
 
 import requests
 from psycopg2.extensions import cursor
 
+from _dependencies.cloud_func_parallel_guard import check_and_save_event_id
 from _dependencies.commons import (
     Topics,
     get_app_config,
@@ -19,10 +18,20 @@ from _dependencies.commons import (
     setup_google_logging,
     sql_connect_by_psycopg2,
 )
-from _dependencies.misc import notify_admin
+from _dependencies.misc import (
+    generate_random_function_id,
+    get_change_log_update_time,
+    get_triggering_function,
+    notify_admin,
+    process_pubsub_message_v2,
+    process_response,
+    save_sending_status_to_notif_by_user,
+    send_location_to_api,
+    send_message_to_api,
+)
 
 setup_google_logging()
-
+FUNC_NAME = 'send_notifications_helper'
 # To get rid of telegram "Retrying" Warning logs, which are shown in GCP Log Explorer as Errors.
 # Important – these are not errors, but just informational warnings that there were retries, that's why we exclude them
 logging.getLogger('telegram.vendor.ptb_urllib3.urllib3').setLevel(logging.ERROR)
@@ -36,97 +45,6 @@ SLEEP_TIME_FOR_NEW_NOTIFS_RECHECK_SECONDS = 0
 analytics_notif_times = []
 analytics_delays = []
 analytics_parsed_times = []
-
-
-def process_pubsub_message(event):
-    """get message from pub/sub notification"""
-
-    # receiving message text from pub/sub
-    try:
-        if 'data' in event:
-            received_message_from_pubsub = base64.b64decode(event['data']).decode('utf-8')
-            encoded_to_ascii = eval(received_message_from_pubsub)
-            data_in_ascii = encoded_to_ascii['data']
-            message_in_ascii = data_in_ascii['message']
-        else:
-            message_in_ascii = 'ERROR: I cannot read message from pub/sub'
-    except:  # noqa
-        message_in_ascii = 'ERROR: I cannot read message from pub/sub'
-
-    logging.info(f'received message from pub/sub: {message_in_ascii}')
-
-    return message_in_ascii
-
-
-def send_message_to_api(session, bot_token, user_id, message, params):
-    """send message directly to Telegram API w/o any wrappers ar libraries"""
-
-    try:
-        parse_mode = ''
-        disable_web_page_preview = ''
-        reply_markup = ''
-        if params:
-            if 'parse_mode' in params.keys():
-                parse_mode = f'&parse_mode={params["parse_mode"]}'
-            if 'disable_web_page_preview' in params.keys():
-                disable_web_page_preview = f'&disable_web_page_preview={params["disable_web_page_preview"]}'
-            if 'reply_markup' in params.keys():
-                reply_markup_temp = params['reply_markup']
-                reply_markup_json = json.dumps(reply_markup_temp)
-                reply_markup_string = str(reply_markup_json)
-                reply_markup_encoded = urllib.parse.quote(reply_markup_string)
-                reply_markup = f'&reply_markup={reply_markup_encoded}'
-
-                logging.info(f'{reply_markup_temp=}')
-                logging.info(f'{reply_markup_json=}')
-                logging.info(f'{reply_markup_string=}')
-                logging.info(f'{reply_markup_encoded=}')
-                logging.info(f'{reply_markup=}')
-
-        message_encoded = urllib.parse.quote(message)
-
-        request_text = (
-            f'https://api.telegram.org/bot{bot_token}/sendMessage?chat_id={user_id}'
-            f'{parse_mode}{disable_web_page_preview}{reply_markup}&text={message_encoded}'
-        )
-
-        r = session.get(request_text)
-
-    except Exception as e:
-        logging.exception(e)
-        logging.info('Error in getting response from Telegram')
-        r = None
-
-    return r
-
-
-def send_location_to_api(session, bot_token, user_id, params):
-    """send location directly to Telegram API w/o any wrappers ar libraries"""
-
-    try:
-        latitude = ''
-        longitude = ''
-        if params:
-            if 'latitude' in params.keys():
-                latitude = f'&latitude={params["latitude"]}'
-            if 'longitude' in params.keys():
-                longitude = f'&longitude={params["longitude"]}'
-
-        logging.info(latitude)
-        logging.info(longitude)
-
-        request_text = (
-            f'https://api.telegram.org/bot{bot_token}/sendLocation?chat_id={user_id}' f'{latitude}{longitude}'
-        )
-
-        r = session.get(request_text)
-
-    except Exception as e:
-        logging.exception(e)
-        logging.info('THIS BAD EXCEPTION HAPPENED')
-        r = None
-
-    return r
 
 
 def check_first_notif_to_send(cur: cursor):
@@ -239,49 +157,6 @@ def check_for_notifs_to_send(cur, first_message):
     return notification
 
 
-def process_response(user_id, response):
-    """process response received as a result of Telegram API call while sending message/location"""
-
-    try:
-        if response.ok:
-            logging.info(f'message to {user_id} was successfully sent')
-            return 'completed'
-
-        elif response.status_code == 400:  # Bad Request
-            logging.info(f'Bad Request: message to {user_id} was not sent, {response.reason=}')
-            logging.exception('BAD REQUEST')
-            return 'cancelled_bad_request'
-
-        elif response.status_code == 403:  # FORBIDDEN
-            logging.info(f'Forbidden: message to {user_id} was not sent, {response.reason=}')
-            action = None
-            if response.text.find('bot was blocked by the user') != -1:
-                action = 'block_user'
-            if response.text.find('user is deactivated') != -1:
-                action = 'delete_user'
-            if action:
-                message_for_pubsub = {'action': action, 'info': {'user': user_id}}
-                publish_to_pubsub(Topics.topic_for_user_management, message_for_pubsub)
-                logging.info(f'Identified user id {user_id} to do {action}')
-            return 'cancelled'
-
-        elif 420 <= response.status_code <= 429:  # 'Flood Control':
-            logging.info(f'Flood Control: message to {user_id} was not sent, {response.reason=}')
-            logging.exception('FLOOD CONTROL')
-            time.sleep(5)  # to mitigate flood control
-            return 'failed_flood_control'
-
-        else:
-            logging.info(f'UNKNOWN ERROR: message to {user_id} was not sent, {response.reason=}')
-            logging.exception('UNKNOWN ERROR')
-            return 'cancelled'
-
-    except Exception as e:
-        logging.info('Response is corrupted')
-        logging.exception(e)
-        return 'failed'
-
-
 def send_single_message(bot_token, user_id, message_content, message_params, message_type, admin_id, session):
     """send one message to telegram"""
 
@@ -325,49 +200,6 @@ def send_single_message(bot_token, user_id, message_content, message_params, mes
             logging.exception(error_description)
 
     return result
-
-
-def save_sending_status_to_notif_by_user(cur, message_id, result):
-    """save the telegram sending status to sql table notif_by_user"""
-
-    if result[0:9] == 'cancelled':
-        result = result[0:9]
-    elif result[0:6] == 'failed':
-        result = result[0:6]
-
-    if result in {'completed', 'cancelled', 'failed'}:
-        sql_text_psy = f"""
-                    UPDATE notif_by_user
-                    SET {result} = %s
-                    WHERE message_id = %s;
-                    /*action='save_sending_status_to_notif_by_user_{result}' */
-                    ;"""
-
-        cur.execute(sql_text_psy, (datetime.datetime.now(), message_id))
-
-    return None
-
-
-def get_change_log_update_time(cur, change_log_id):
-    """get he time of parsing of the change, saved in PSQL"""
-
-    if not change_log_id:
-        return None
-
-    sql_text_psy = """
-                    SELECT parsed_time
-                    FROM change_log
-                    WHERE id = %s;
-                    /*action='getting_change_log_parsing_time' */;"""
-    cur.execute(sql_text_psy, (change_log_id,))
-    parsed_time = cur.fetchone()
-
-    if not parsed_time:
-        return None
-
-    parsed_time = parsed_time[0]
-
-    return parsed_time
 
 
 def iterate_over_notifications(
@@ -522,117 +354,6 @@ def iterate_over_notifications(
     return list_of_change_ids
 
 
-def check_and_save_event_id(
-    context: str, event: str, function_id: int, changed_ids: Optional[List], triggered_by_func_id
-) -> bool:
-    """Work with PSQL table functions_registry. Goal of the table & function is to avoid parallel work of
-    two send_notifications_helper functions."""
-
-    def check_if_other_functions_are_working():
-        """Check in PSQL in there's the same function 'send_notifications_helper' working in parallel"""
-
-        conn_psy = sql_connect_by_psycopg2()
-        cur = conn_psy.cursor()
-
-        sql_text_psy = f"""
-                        SELECT
-                            event_id
-                        FROM
-                            functions_registry
-                        WHERE
-                            time_start > NOW() - interval '{INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS} seconds' AND
-                            time_finish IS NULL AND
-                            cloud_function_name  = 'send_notifications_helper'
-                        ;
-                        /*action='check_if_there_is_parallel_notif_function' */
-                        ;"""
-
-        cur.execute(sql_text_psy)
-        lines = cur.fetchone()
-
-        parallel_functions = True if lines else False
-
-        cur.close()
-        conn_psy.close()
-
-        return parallel_functions
-
-    def record_start_of_function(event_num: int, function_num: int, triggered_by_func_num: int) -> None:
-        """Record into PSQL that this function started working (id = id of the respective pub/sub event)"""
-
-        conn_psy = sql_connect_by_psycopg2()
-        cur = conn_psy.cursor()
-
-        sql_text_psy = """
-                        INSERT INTO
-                            functions_registry
-                        (event_id, time_start, cloud_function_name, function_id, triggered_by_func_id)
-                        VALUES
-                        (%s, %s, %s, %s, %s);
-                        /*action='save_start_of_notif_helper_function' */
-                        ;"""
-
-        cur.execute(
-            sql_text_psy,
-            (event_num, datetime.datetime.now(), 'send_notifications_helper', function_num, triggered_by_func_num),
-        )
-        logging.info(f'function was triggered by event {event_num}, we assigned a function_id = {function_num}')
-
-        cur.close()
-        conn_psy.close()
-
-        return None
-
-    def record_finish_of_function(event_num: int, list_of_changed_ids: list) -> None:
-        """Record into PSQL that this function finished working (id = id of the respective pub/sub event)"""
-
-        conn_psy = sql_connect_by_psycopg2()
-        cur = conn_psy.cursor()
-
-        json_of_params = json.dumps({'ch_id': list_of_changed_ids})
-
-        sql_text_psy = """
-                        UPDATE
-                            functions_registry
-                        SET
-                            time_finish = %s,
-                            params = %s
-                        WHERE
-                            event_id = %s
-                        ;
-                        /*action='save_finish_of_notif_function' */
-                        ;"""
-
-        cur.execute(sql_text_psy, (datetime.datetime.now(), json_of_params, event_num))
-
-        cur.close()
-        conn_psy.close()
-
-        return None
-
-    if not context or not event:
-        return False
-
-    try:
-        event_id = context.event_id
-    except Exception as e:  # noqa
-        return False
-
-    # if this functions is triggered in the very beginning of the Google Cloud Function execution
-    if event == 'start':
-        if check_if_other_functions_are_working():
-            record_start_of_function(event_id, function_id, triggered_by_func_id)
-            return True
-
-        record_start_of_function(event_id, function_id, triggered_by_func_id)
-        return False
-
-    # if this functions is triggered in the very end of the Google Cloud Function execution
-    elif event == 'finish':
-        record_finish_of_function(event_id, changed_ids)
-        return False
-
-
 def finish_time_analytics(notif_times: List, delays: List, parsed_times: List, list_of_change_ids: List):
     """Make final steps for time analytics: inform admin, log, record statistics into PSQL"""
 
@@ -687,37 +408,6 @@ def finish_time_analytics(notif_times: List, delays: List, parsed_times: List, l
     return None
 
 
-def generate_random_function_id() -> int:
-    """generates a random ID for every function – to track all function dependencies (no built-in ID in GCF)"""
-
-    random_id = random.randint(100000000000, 999999999999)
-
-    return random_id
-
-
-def get_triggering_function(message_from_pubsub: str):
-    """get a function_id of the function, which triggered this function (if available)"""
-
-    triggered_by_func_id = None
-    try:
-        if (
-            message_from_pubsub
-            and isinstance(message_from_pubsub, dict)
-            and 'triggered_by_func_id' in message_from_pubsub.keys()
-        ):
-            triggered_by_func_id = message_from_pubsub['triggered_by_func_id']
-
-    except Exception as e:
-        logging.exception(e)
-
-    if triggered_by_func_id:
-        logging.info(f'this function is triggered by func-id {triggered_by_func_id}')
-    else:
-        logging.info('triggering func_id was not determined')
-
-    return triggered_by_func_id
-
-
 def main(event, context):
     """Main function that is triggered by pub/sub"""
 
@@ -730,15 +420,29 @@ def main(event, context):
 
     function_id = generate_random_function_id()
 
-    message_from_pubsub = process_pubsub_message(event)
+    message_from_pubsub = process_pubsub_message_v2(event)
     triggered_by_func_id = get_triggering_function(message_from_pubsub)
 
     there_is_function_working_in_parallel = check_and_save_event_id(
-        context, 'start', function_id, None, triggered_by_func_id
+        context,
+        'start',
+        function_id,
+        None,
+        triggered_by_func_id,
+        FUNC_NAME,
+        INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS,
     )
     if there_is_function_working_in_parallel:
         logging.info('function execution stopped due to parallel run with another function')
-        check_and_save_event_id(context, 'finish', function_id, None, None)
+        check_and_save_event_id(
+            context,
+            'finish',
+            function_id,
+            None,
+            None,
+            FUNC_NAME,
+            INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS,
+        )
         logging.info('script finished')
         return None
 
@@ -754,7 +458,15 @@ def main(event, context):
     analytics_delays = []
     analytics_parsed_times = []
 
-    check_and_save_event_id(context, 'finish', function_id, changed_ids, None)
+    check_and_save_event_id(
+        context,
+        'finish',
+        function_id,
+        changed_ids,
+        None,
+        FUNC_NAME,
+        INTERVAL_TO_CHECK_PARALLEL_FUNCTION_SECONDS,
+    )
     logging.info('script finished')
 
     return 'ok'

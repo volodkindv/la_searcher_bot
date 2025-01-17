@@ -4,20 +4,19 @@ The current script checks Telegram authentication and retrieves user's key data 
 # TODO - add functions descriptions
 # TODO – add functions typing hints
 
-import datetime
 import hashlib
 import hmac
 import json
 import logging
 import re
-from typing import Any
 from urllib.parse import unquote
 
 import functions_framework
-from bs4 import BeautifulSoup
 from flask import Request
 
 from _dependencies.commons import get_app_config, setup_google_logging, sql_connect_by_psycopg2
+from _dependencies.content import clean_up_content
+from _dependencies.misc import evaluate_city_locations, time_counter_since_search_start
 
 setup_google_logging()
 
@@ -85,78 +84,6 @@ def verify_telegram_data(user_input, token):
         result = verify_telegram_data_json(user_input, token)
 
     return result
-
-
-def evaluate_city_locations(city_locations):
-    if not city_locations:
-        logging.info('no city_locations')
-        return None
-
-    cl_eval = eval(city_locations)
-    if not cl_eval:
-        logging.info('no eval of city_locations')
-        return None
-
-    if not isinstance(cl_eval, list):
-        logging.info('eval of city_locations is not list')
-        return None
-
-    first_coords = cl_eval[0]
-
-    if not first_coords:
-        logging.info('no first coords in city_locations')
-        return None
-
-    if not isinstance(first_coords, list):
-        logging.info('fist coords in city_locations is not list')
-        return None
-
-    logging.info(f'city_locations has coords {first_coords}')
-
-    return [first_coords]
-
-
-def time_counter_since_search_start(start_time):
-    """Count timedelta since the beginning of search till now, return phrase in Russian and diff in days"""
-
-    start_diff = datetime.timedelta(hours=0)
-
-    now = datetime.datetime.now()
-    diff = now - start_time - start_diff
-
-    first_word_parameter = ''
-
-    # <20 minutes -> "Начинаем искать"
-    if (diff.total_seconds() / 60) < 20:
-        phrase = 'Начинаем искать'
-
-    # 20 min - 1 hour -> "Ищем ХХ минут"
-    elif (diff.total_seconds() / 3600) < 1:
-        phrase = first_word_parameter + str(round(int(diff.total_seconds() / 60), -1)) + ' минут'
-
-    # 1-24 hours -> "Ищем ХХ часов"
-    elif diff.days < 1:
-        phrase = first_word_parameter + str(int(diff.total_seconds() / 3600))
-        if int(diff.total_seconds() / 3600) in {1, 21}:
-            phrase += ' час'
-        elif int(diff.total_seconds() / 3600) in {2, 3, 4, 22, 23}:
-            phrase += ' часа'
-        else:
-            phrase += ' часов'
-
-    # >24 hours -> "Ищем Х дней"
-    else:
-        phrase = first_word_parameter + str(diff.days)
-        if str(int(diff.days))[-1] == '1' and (int(diff.days)) != 11:
-            phrase += ' день'
-        elif int(diff.days) in {12, 13, 14}:
-            phrase += ' дней'
-        elif str(int(diff.days))[-1] in {'2', '3', '4'}:
-            phrase += ' дня'
-        else:
-            phrase += ' дней'
-
-    return [phrase, diff.days]
 
 
 def get_user_data_from_db(user_id: int) -> dict:
@@ -436,88 +363,6 @@ def save_user_statistics_to_db(user_id: int, response: bool) -> None:
     conn_psy.close()
 
     return None
-
-
-def clean_up_content(init_content):
-    def cook_soup(content):
-        content = BeautifulSoup(content, 'lxml')
-
-        return content
-
-    def prettify_soup(content):
-        for s in content.find_all('strong', {'class': 'text-strong'}):
-            s.unwrap()
-
-        for s in content.find_all('span'):
-            try:
-                if s.attrs['style'] and s['style'] and len(s['style']) > 5 and s['style'][0:5] == 'color':
-                    s.unwrap()
-            except Exception as e:
-                logging.exception(e)
-                continue
-
-        deleted_text = content.find_all('span', {'style': 'text-decoration:line-through'})
-        for case in deleted_text:
-            case.decompose()
-
-        for dd in content.find_all('dd', style='display:none'):
-            del dd['style']
-
-        return content
-
-    def remove_links(content):
-        for tag in content.find_all('a'):
-            if tag.name == 'a' and not re.search(r'\[[+−]]', tag.text):
-                tag.unwrap()
-
-        return content
-
-    def remove_irrelevant_content(content):
-        # language=regexp
-        patterns = (
-            r'(?i)(Карты.*\n|'
-            r'Ориентировка на печать.*\n|'
-            r'Ориентировка на репост.*\n|'
-            r'\[\+] СМИ.*\n|'
-            r'СМИ\s.*\n|'
-            r'Задача на поиске с которой может помочь каждый.*\n|'
-            r'ВНИМАНИЕ! Всем выезжающим иметь СИЗ.*\n|'
-            r'С признаками ОРВИ оставайтесь дома.*\n|'
-            r'Берегите себя и своих близких!.*\n|'
-            r'Если же представитель СМИ хочет.*\n|'
-            r'8\(800\)700-54-52 или.*\n|'
-            r'Предоставлять комментарии по поиску.*\n|'
-            r'Таблица прозвона больниц.*\n|'
-            r'Запрос на согласование фото.*(\n|(\s*)?$)|'
-            r'Все фото.*(\n|(\s*)?$)|'
-            r'Написать инфоргу.*в (Telegram|Телеграмм?)(\n|(\s*)?$)|'
-            r'Горячая линия отряда:.*(\n|(\s*)?$))'
-        )
-
-        content = re.sub(patterns, '', content)
-        content = re.sub(r'[\s_-]*$', '', content)
-        content = re.sub(r'\n\n', r'\n', content)
-        content = re.sub(r'\n\n', r'\n', content)
-
-        return content
-
-    def make_html(content):
-        content = re.sub(r'\n', '<br>', content)
-
-        return content
-
-    if not init_content or re.search(r'Для просмотра этого форума вы должны быть авторизованы', init_content):
-        return None
-
-    reco_content = cook_soup(init_content)
-    reco_content = prettify_soup(reco_content)
-    reco_content = remove_links(reco_content)
-    reco_content = reco_content.text
-    reco_content = remove_irrelevant_content(reco_content)
-    reco_content = make_html(reco_content)
-    logging.info(f'{reco_content=}')
-
-    return reco_content
 
 
 @functions_framework.http

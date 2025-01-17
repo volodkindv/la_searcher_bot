@@ -55,6 +55,8 @@ def _get_default_arg_value(param):
         return pool.connect()
     elif param._annotation is psycopg2.extensions.connection:
         return sql_connect_by_psycopg2()
+    elif param._annotation is psycopg2.extensions.cursor:
+        return sql_connect_by_psycopg2().cursor()
 
     # suggestions
     elif param.name == 'conn':
@@ -83,7 +85,20 @@ def generate_args_for_function(func: Callable) -> dict[str, Any]:
 def run_smoke(func: Callable):
     """runs fumction with default args"""
     args = generate_args_for_function(func)
-    return func(**args)
+    try:
+        return func(**args)
+    except Exception as e:
+        raise e
+    finally:
+        for arg in args:
+            if False:
+                pass
+            elif isinstance(args[arg], psycopg2.extensions.cursor):
+                args[arg].close()
+            elif isinstance(args[arg], psycopg2.extensions.connection):
+                args[arg].close()
+            elif isinstance(args[arg], sqlalchemy.engine.Connection):
+                args[arg].close()
 
 
 @lru_cache

@@ -9,11 +9,6 @@ def test_add_user_sys_role():
     pass
 
 
-def test_age_writer():
-    res = run_smoke(main.age_writer)
-    pass
-
-
 def test_api_callback_edit_inline_keyboard():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.api_callback_edit_inline_keyboard)
@@ -219,11 +214,6 @@ def test_manage_topic_type():
     pass
 
 
-def test_prepare_message_for_async():
-    res = run_smoke(main.prepare_message_for_async)
-    pass
-
-
 def test_prepare_message_for_leave_chat_async():
     res = run_smoke(main.prepare_message_for_leave_chat_async)
     pass
@@ -241,11 +231,6 @@ def test_process_leaving_chat_async():
 
 def test_process_response_of_api_call():
     res = run_smoke(main.process_response_of_api_call)
-    pass
-
-
-def test_process_sending_message_async():
-    res = run_smoke(main.process_sending_message_async)
     pass
 
 
@@ -331,11 +316,6 @@ def test_send_callback_answer_to_api():
     pass
 
 
-def test_send_message_async():
-    res = run_smoke(main.send_message_async)
-    pass
-
-
 def test_send_message_to_api():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.send_message_to_api)
@@ -349,12 +329,6 @@ def test_set_search_follow_mode():
 
 def test_show_user_coordinates():
     res = run_smoke(main.show_user_coordinates)
-    pass
-
-
-def test_time_counter_since_search_start():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.time_counter_since_search_start)
     pass
 
 
