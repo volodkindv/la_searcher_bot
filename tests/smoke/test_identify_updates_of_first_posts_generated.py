@@ -4,11 +4,6 @@ from identify_updates_of_first_posts import main
 from tests.common import run_smoke
 
 
-def test_age_writer():
-    res = run_smoke(main.age_writer)
-    pass
-
-
 def test_clean_up_content():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.clean_up_content)

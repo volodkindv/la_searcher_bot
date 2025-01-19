@@ -1,16 +1,12 @@
 import pytest
 
+import _dependencies.misc
 from compose_notifications import main
 from tests.common import run_smoke
 
 
 def test_add_tel_link():
     res = run_smoke(main.add_tel_link)
-    pass
-
-
-def test_age_writer():
-    res = run_smoke(main.age_writer)
     pass
 
 

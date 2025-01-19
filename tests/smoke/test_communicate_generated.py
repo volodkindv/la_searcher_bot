@@ -9,11 +9,6 @@ def test_add_user_sys_role():
     pass
 
 
-def test_age_writer():
-    res = run_smoke(main.age_writer)
-    pass
-
-
 def test_api_callback_edit_inline_keyboard():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.api_callback_edit_inline_keyboard)
