@@ -1,5 +1,6 @@
 import pytest
 
+import _dependencies.misc
 from api_get_active_searches import main
 from tests.common import run_smoke
 
@@ -33,12 +34,6 @@ def test_main():
 
 def test_save_user_statistics_to_db():
     res = run_smoke(main.save_user_statistics_to_db)
-    pass
-
-
-def test_time_counter_since_search_start():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.time_counter_since_search_start)
     pass
 
 

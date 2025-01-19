@@ -31,12 +31,6 @@ def test_save_user_statistics_to_db():
     pass
 
 
-def test_time_counter_since_search_start():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.time_counter_since_search_start)
-    pass
-
-
 def test_verify_telegram_data():
     res = run_smoke(main.verify_telegram_data)
     pass

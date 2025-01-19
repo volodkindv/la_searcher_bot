@@ -352,12 +352,6 @@ def test_show_user_coordinates():
     pass
 
 
-def test_time_counter_since_search_start():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.time_counter_since_search_start)
-    pass
-
-
 def test_update_and_download_list_of_regions():
     res = run_smoke(main.update_and_download_list_of_regions)
     pass
