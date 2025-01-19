@@ -63,7 +63,7 @@ def test_save_sending_status_to_notif_by_user():
 
 
 def test_send_location_to_api():
-    res = run_smoke(main.send_location_to_api)
+    res = run_smoke(_dependencies.misc.send_location_to_api)
     pass
 
 
