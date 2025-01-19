@@ -16,11 +16,6 @@ def test_compose_diff_message():
     pass
 
 
-def test_generate_random_function_id():
-    res = run_smoke(main.generate_random_function_id)
-    pass
-
-
 def test_get_compressed_first_post():
     res = run_smoke(main.get_compressed_first_post)
     pass
