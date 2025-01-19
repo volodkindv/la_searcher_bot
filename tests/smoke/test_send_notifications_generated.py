@@ -1,5 +1,6 @@
 import pytest
 
+import _dependencies.misc
 from send_notifications import main
 from tests.common import run_smoke
 
@@ -26,7 +27,7 @@ def test_finish_time_analytics():
 
 
 def test_get_change_log_update_time():
-    res = run_smoke(main.get_change_log_update_time)
+    res = run_smoke(_dependencies.misc.get_change_log_update_time)
     pass
 
 
