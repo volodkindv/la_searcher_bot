@@ -15,8 +15,7 @@ def test_get_user_data():
 
 
 def test_get_user_id():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.get_user_id)
+    res = run_smoke(main.get_user_id)
     pass
 
 
