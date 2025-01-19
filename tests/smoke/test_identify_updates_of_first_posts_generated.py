@@ -4,12 +4,6 @@ from identify_updates_of_first_posts import main
 from tests.common import run_smoke
 
 
-def test_clean_up_content():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.clean_up_content)
-    pass
-
-
 def test_compose_diff_message():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.compose_diff_message)

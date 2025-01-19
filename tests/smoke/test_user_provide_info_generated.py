@@ -4,12 +4,6 @@ from tests.common import run_smoke
 from user_provide_info import main
 
 
-def test_clean_up_content():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.clean_up_content)
-    pass
-
-
 def test_get_user_data_from_db():
     res = run_smoke(main.get_user_data_from_db)
     pass
