@@ -1,10 +1,10 @@
 from pathlib import Path
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 import pytest
 import requests
 
-from _dependencies.commons import sql_connect_by_psycopg2
+from _dependencies.commons import sql_connect_by_psycopg2, sqlalchemy_get_pool
 from identify_updates_of_topics import main
 from tests.common import get_event_with_data
 from title_recognize.main import recognize_title
@@ -41,8 +41,8 @@ def test_parse_one_folder():
         reco_data = recognize_title(data['title'], None)
         return {'status': 'ok', 'recognition': reco_data}
 
+    pool = sqlalchemy_get_pool(10, 10)
     with (
-        sql_connect_by_psycopg2() as db,
         patch.object(main, 'requests_session', requests.Session()),
         patch.object(main.requests_session, 'get') as mock_http,
         patch.object(main, 'make_api_call', fake_api_call),
@@ -50,9 +50,51 @@ def test_parse_one_folder():
         mock_http.return_value.content = Path('tests/fixtures/forum_folder_276.html').read_bytes()
 
         forum_search_folder_id = 276
-        summaries, details = main.parse_one_folder(db, forum_search_folder_id)
+        summaries, details = main.parse_one_folder(pool, forum_search_folder_id)
         assert summaries == [
             ['Жив Иванов Иван, 10 лет, ЗАО, г. Москва', 29],
             ['Пропал Петров Петр Петрович, 48 лет, ЗелАО, г. Москва - Тверская обл.', 116],
         ]
         assert len(details) == 2
+
+
+def test_process_one_folder():
+    def fake_api_call(function: str, data: dict):
+        reco_data = recognize_title(data['title'], None)
+        return {'status': 'ok', 'recognition': reco_data}
+
+    pool = sqlalchemy_get_pool(10, 10)
+    with (
+        patch.object(main, 'requests_session', requests.Session()),
+        patch.object(main.requests_session, 'get') as mock_http,
+        patch.object(main, 'make_api_call', fake_api_call),
+        patch.object(main, 'read_snapshot_from_cloud_storage', Mock(return_value='foo')),
+        patch.object(main, 'write_snapshot_to_cloud_storage'),
+        patch.object(main, 'parse_search_profile', Mock(return_value='foo')),
+    ):
+        mock_http.return_value.content = Path('tests/fixtures/forum_folder_276.html').read_bytes()
+
+        forum_search_folder_id = 276
+        update_trigger, changed_ids = main.process_one_folder(pool, forum_search_folder_id)
+        assert update_trigger is True
+
+
+def test_main_full_scenario():
+    def fake_api_call(function: str, data: dict):
+        reco_data = recognize_title(data['title'], None)
+        return {'status': 'ok', 'recognition': reco_data}
+
+    with (
+        patch.object(main, 'requests_session', requests.Session()),
+        patch.object(main.requests_session, 'get') as mock_http,
+        patch.object(main, 'make_api_call', fake_api_call),
+        patch.object(main, 'read_snapshot_from_cloud_storage', Mock(return_value='foo')),
+        patch.object(main, 'write_snapshot_to_cloud_storage'),
+        patch.object(main, 'parse_search_profile', Mock(return_value='foo')),
+        patch('compose_notifications.main.check_if_need_compose_more'),  # avoid recursion in tests
+    ):
+        mock_http.return_value.content = Path('tests/fixtures/forum_folder_276.html').read_bytes()
+
+        forum_search_folder_id = 276
+        data = [(forum_search_folder_id,)]
+        main.main(get_event_with_data(str(data)), 'context')
