@@ -1,6 +1,5 @@
 import pytest
 
-import _dependencies.misc
 from compose_notifications import main
 from tests.common import run_smoke
 
