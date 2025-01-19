@@ -1,5 +1,6 @@
 import pytest
 
+import _dependencies.misc
 from api_get_active_searches import main
 from tests.common import run_smoke
 
@@ -7,12 +8,6 @@ from tests.common import run_smoke
 def test_clean_up_content():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.clean_up_content)
-    pass
-
-
-def test_evaluate_city_locations():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.evaluate_city_locations)
     pass
 
 

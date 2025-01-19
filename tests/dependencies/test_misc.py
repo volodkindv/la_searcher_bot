@@ -69,3 +69,23 @@ def test_save_sending_status_to_notif_by_user():
     with sql_connect_by_psycopg2() as connection:
         with connection.cursor() as cursor:
             misc.save_sending_status_to_notif_by_user(cursor, 1, 'cancelled')
+
+
+def test_evaluate_city_locations_success():
+    res = misc.evaluate_city_locations('[[56.0, 64.0]]')
+    assert res == [[56.0, 64.0]]
+
+
+@pytest.mark.parametrize(
+    'param',
+    [
+        [],
+        [1],
+        [None],
+        '"foo"',
+        '',
+    ],
+)
+def test_evaluate_city_locations_fail(param):
+    res = misc.evaluate_city_locations(str(param))
+    assert res is None
