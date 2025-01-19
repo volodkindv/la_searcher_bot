@@ -57,12 +57,6 @@ def test_process_one_folder():
     pass
 
 
-def test_process_pubsub_message():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.process_pubsub_message)
-    pass
-
-
 def test_profile_get_managers():
     res = run_smoke(main.profile_get_managers)
     pass

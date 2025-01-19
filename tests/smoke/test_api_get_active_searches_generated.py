@@ -1,6 +1,5 @@
 import pytest
 
-import _dependencies.misc
 from api_get_active_searches import main
 from tests.common import run_smoke
 

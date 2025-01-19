@@ -41,11 +41,6 @@ def test_main():
     pass
 
 
-def test_process_pubsub_message():
-    res = run_smoke(main.process_pubsub_message)
-    pass
-
-
 def test_process_response():
     res = run_smoke(main.process_response)
     pass

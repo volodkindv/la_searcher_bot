@@ -47,12 +47,6 @@ def test_process_first_page_comparison():
     pass
 
 
-def test_process_pubsub_message():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.process_pubsub_message)
-    pass
-
-
 def test_save_function_into_register():
     res = run_smoke(main.save_function_into_register)
     pass
