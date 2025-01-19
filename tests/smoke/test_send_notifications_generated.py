@@ -1,6 +1,5 @@
 import pytest
 
-import _dependencies.misc
 from send_notifications import main
 from tests.common import run_smoke
 
@@ -23,11 +22,6 @@ def test_check_for_number_of_notifs_to_send():
 def test_finish_time_analytics():
     with pytest.raises(Exception) as e:
         res = run_smoke(main.finish_time_analytics)
-    pass
-
-
-def test_get_change_log_update_time():
-    res = run_smoke(_dependencies.misc.get_change_log_update_time)
     pass
 
 
@@ -54,16 +48,6 @@ def test_process_pubsub_message():
 
 def test_process_response():
     res = run_smoke(main.process_response)
-    pass
-
-
-def test_save_sending_status_to_notif_by_user():
-    res = run_smoke(main.save_sending_status_to_notif_by_user)
-    pass
-
-
-def test_send_location_to_api():
-    res = run_smoke(_dependencies.misc.send_location_to_api)
     pass
 
 

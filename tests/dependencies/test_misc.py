@@ -63,3 +63,9 @@ def test_send_location_to_api():
             '2',
             {'latitude': 50, 'longitude': 50},
         )
+
+
+def test_save_sending_status_to_notif_by_user():
+    with sql_connect_by_psycopg2() as connection:
+        with connection.cursor() as cursor:
+            misc.save_sending_status_to_notif_by_user(cursor, 1, 'cancelled')
