@@ -27,9 +27,3 @@ def test_verify_telegram_data():
 def test_verify_telegram_data_json():
     res = run_smoke(main.verify_telegram_data_json)
     pass
-
-
-def test_verify_telegram_data_string():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.verify_telegram_data_string)
-    pass

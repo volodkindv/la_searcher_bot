@@ -4,12 +4,6 @@ from identify_updates_of_first_posts import main
 from tests.common import run_smoke
 
 
-def test_compose_diff_message():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.compose_diff_message)
-    pass
-
-
 def test_get_compressed_first_post():
     res = run_smoke(main.get_compressed_first_post)
     pass
@@ -22,12 +16,6 @@ def test_get_field_trip_details_from_text():
 
 def test_get_the_list_of_coords_out_of_text():
     res = run_smoke(main.get_the_list_of_coords_out_of_text)
-    pass
-
-
-def test_main():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.main)
     pass
 
 

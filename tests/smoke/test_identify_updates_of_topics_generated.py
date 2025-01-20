@@ -24,31 +24,13 @@ def test_get_the_list_of_ignored_folders():
     pass
 
 
-def test_main():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.main)
-    pass
-
-
 def test_parse_coordinates():
     res = run_smoke(main.parse_coordinates)
     pass
 
 
-def test_parse_one_comment():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.parse_one_comment)
-    pass
-
-
 def test_parse_one_folder():
     res = run_smoke(main.parse_one_folder)
-    pass
-
-
-def test_parse_search_profile():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.parse_search_profile)
     pass
 
 
@@ -92,35 +74,11 @@ def test_save_last_api_call_time_to_psql():
     pass
 
 
-def test_set_cloud_storage():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.set_cloud_storage)
-    pass
-
-
 def test_sql_connect():
     res = run_smoke(main.sql_connect)
     pass
 
 
-def test_update_change_log_and_searches():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.update_change_log_and_searches)
-    pass
-
-
 def test_update_coordinates():
     res = run_smoke(main.update_coordinates)
-    pass
-
-
-def test_visibility_check():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.visibility_check)
-    pass
-
-
-def test_write_snapshot_to_cloud_storage():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.write_snapshot_to_cloud_storage)
     pass

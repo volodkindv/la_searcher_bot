@@ -16,6 +16,7 @@ import sqlalchemy
 from bs4 import BeautifulSoup, SoupStrainer  # noqa
 from geopy.geocoders import Nominatim
 from google.cloud import storage
+from google.cloud.storage.blob import Blob
 from psycopg2.extensions import connection
 from sqlalchemy.engine.base import Engine
 from yandex_geocoder import Client, exceptions
@@ -104,7 +105,7 @@ class SearchSummary:
         )
 
 
-def set_cloud_storage(bucket_name: str, folder_num: int):
+def set_cloud_storage(bucket_name: str, folder_num: int) -> Blob:
     """sets the basic parameters for connection to txt file in cloud storage, which stores searches snapshots"""
 
     if isinstance(folder_num, int) or folder_num == 'geocode':
@@ -177,7 +178,7 @@ def save_last_api_call_time_to_psql(db: Engine, geocoder: str) -> bool:
         return False
 
 
-def get_last_api_call_time_from_psql(db: Engine, geocoder: str) -> datetime.timestamp:
+def get_last_api_call_time_from_psql(db: Engine, geocoder: str) -> int:
     """Used to track time of the last api call to geocoders. Gets the last timestamp in UTC saved in psql"""
 
     conn = None

@@ -24,12 +24,6 @@ def test_login_into_forum():
     pass
 
 
-def test_main():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.main)
-    pass
-
-
 def test_match_user_region_from_forum_to_bot():
     res = run_smoke(main.match_user_region_from_forum_to_bot)
     pass

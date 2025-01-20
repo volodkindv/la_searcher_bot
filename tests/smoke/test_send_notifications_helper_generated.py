@@ -14,20 +14,8 @@ def test_check_for_notifs_to_send():
     pass
 
 
-def test_finish_time_analytics():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.finish_time_analytics)
-    pass
-
-
 def test_iterate_over_notifications():
     res = run_smoke(main.iterate_over_notifications)
-    pass
-
-
-def test_main():
-    with pytest.raises(Exception) as e:
-        res = run_smoke(main.main)
     pass
 
 

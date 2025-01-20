@@ -96,7 +96,7 @@ def get_the_list_of_coords_out_of_text(initial_text: str):
     return resulting_list
 
 
-def compose_diff_message(curr_list, prev_list):
+def compose_diff_message(curr_list: list[str], prev_list: list[str]) -> tuple[str, list, list]:
     message = ''
 
     if not curr_list or not prev_list:
