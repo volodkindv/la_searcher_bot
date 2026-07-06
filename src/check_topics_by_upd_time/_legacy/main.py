@@ -461,10 +461,12 @@ def process_folder(
     # Queue only new/changed subfolders (from comparator), carrying their timestamps
     child_timestamps = {str(sf.folder_num): sf.change_time_str for sf in decomposed_folder.subfolders}
     for line in list_of_new_folders:
-        folders_to_check.append(FolderForDecompose(
-            mother_folder_num=str(line),
-            mother_folder_timestamp=child_timestamps.get(str(line)),
-        ))
+        folders_to_check.append(
+            FolderForDecompose(
+                mother_folder_num=str(line),
+                mother_folder_timestamp=child_timestamps.get(str(line)),
+            )
+        )
 
     if new_child_searches_str != old_child_searches_str:
         updated_folders.append((folder.mother_folder_num, folder.mother_folder_name))
@@ -478,17 +480,21 @@ def get_updates_of_nested_folders(folders_list_to_scan: list[tuple[str, str]]) -
     updated_folders: list = []
 
     for folder_num, folder_timestamp in folders_list_to_scan:
-        folders_to_check.append(FolderForDecompose(
-            mother_folder_num=folder_num,
-            mother_folder_timestamp=folder_timestamp,
-        ))
+        folders_to_check.append(
+            FolderForDecompose(
+                mother_folder_num=folder_num,
+                mother_folder_timestamp=folder_timestamp,
+            )
+        )
 
     with ThreadPoolExecutor(max_workers=WORKERS_COUNT) as pool:
         futures = []
         while folders_to_check:
             while folders_to_check:
                 folder = folders_to_check.pop()
-                future = pool.submit(process_folder, folders_to_check, updated_folders, folder, storage, folder_timestamps)
+                future = pool.submit(
+                    process_folder, folders_to_check, updated_folders, folder, storage, folder_timestamps
+                )
                 futures.append(future)
             wait(futures)
             [f.result() for f in futures]  # check that all tasks are done without exceptions

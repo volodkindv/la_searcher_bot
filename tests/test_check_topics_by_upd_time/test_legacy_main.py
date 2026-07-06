@@ -5,7 +5,7 @@ get_updated_root_folders, save_root_timestamps, and main().
 """
 
 import datetime
-from unittest.mock import MagicMock, PropertyMock, patch
+from unittest.mock import MagicMock, patch
 
 import pytest
 
@@ -96,7 +96,9 @@ class TestProcessFolderTimestampSkip:
         with patch('check_topics_by_upd_time._legacy.main.FolderDecomposer', autospec=True) as mock_cls:
             inst = mock_cls.return_value
             inst.decompose_folder.return_value = DecomposedFolder(
-                subfolders=child_subfolders, searches=[], folder_name='test',
+                subfolders=child_subfolders,
+                searches=[],
+                folder_name='test',
             )
             process_folder(folders_to_check, updated_folders, folder, storage, folder_timestamps)
 
@@ -265,7 +267,11 @@ class TestMainRootTimestampSave:
     @patch('check_topics_by_upd_time._legacy.main.pubsub_parse_folders')
     @patch('check_topics_by_upd_time._legacy.main.save_root_timestamps')
     def test_saves_on_success(
-        self, mock_save, mock_pubsub, mock_get_updates, mock_get_roots,
+        self,
+        mock_save,
+        mock_pubsub,
+        mock_get_updates,
+        mock_get_roots,
     ):
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.return_value = []
@@ -281,7 +287,11 @@ class TestMainRootTimestampSave:
     @patch('check_topics_by_upd_time._legacy.main.pubsub_parse_folders')
     @patch('check_topics_by_upd_time._legacy.main.save_root_timestamps')
     def test_does_not_save_on_failure(
-        self, mock_save, mock_pubsub, mock_get_updates, mock_get_roots,
+        self,
+        mock_save,
+        mock_pubsub,
+        mock_get_updates,
+        mock_get_roots,
     ):
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.side_effect = RuntimeError('traversal failed')
@@ -298,7 +308,11 @@ class TestMainRootTimestampSave:
     @patch('check_topics_by_upd_time._legacy.main.pubsub_parse_folders')
     @patch('check_topics_by_upd_time._legacy.main.save_root_timestamps')
     def test_early_return_when_no_roots(
-        self, mock_save, mock_pubsub, mock_get_updates, mock_get_roots,
+        self,
+        mock_save,
+        mock_pubsub,
+        mock_get_updates,
+        mock_get_roots,
     ):
         mock_get_roots.return_value = []
 
@@ -314,7 +328,10 @@ class TestMainRootTimestampSave:
     @patch('check_topics_by_upd_time._legacy.main.get_updates_of_nested_folders')
     @patch('check_topics_by_upd_time._legacy.main.pubsub_parse_folders')
     def test_pubsub_called_with_updated_folders(
-        self, mock_pubsub, mock_get_updates, mock_get_roots,
+        self,
+        mock_pubsub,
+        mock_get_updates,
+        mock_get_roots,
     ):
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.return_value = [('1', 'folder1')]
@@ -329,7 +346,10 @@ class TestMainRootTimestampSave:
     @patch('check_topics_by_upd_time._legacy.main.get_updates_of_nested_folders')
     @patch('check_topics_by_upd_time._legacy.main.pubsub_parse_folders')
     def test_pubsub_not_called_when_empty(
-        self, mock_pubsub, mock_get_updates, mock_get_roots,
+        self,
+        mock_pubsub,
+        mock_get_updates,
+        mock_get_roots,
     ):
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.return_value = []
