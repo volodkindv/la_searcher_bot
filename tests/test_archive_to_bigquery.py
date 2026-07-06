@@ -5,7 +5,7 @@ from unittest.mock import Mock, patch
 import pytest
 from sqlalchemy.orm.session import Session
 
-from archive_to_bigquery.main import BATCH_SIZE, Archiver, main
+from archive_to_bigquery.main import Archiver, main
 from tests.common import find_model
 from tests.factories.db_factories import NotifByUserHistory, NotifByUserHistoryFactory, faker
 
