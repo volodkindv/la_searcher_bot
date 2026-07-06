@@ -3,8 +3,6 @@
 import logging
 import re
 from collections import Counter
-from datetime import timedelta
-from typing import Any
 
 logger = logging.getLogger(__name__)
 

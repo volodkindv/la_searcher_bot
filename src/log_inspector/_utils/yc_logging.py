@@ -1,6 +1,5 @@
 """Yandex Cloud Logging REST API client."""
 
-import json
 import logging
 import os
 from datetime import datetime, timedelta, timezone
@@ -12,9 +11,6 @@ logger = logging.getLogger(__name__)
 
 # Max page size allowed by Yandex Cloud Logging API
 MAX_PAGE_SIZE = 1000
-
-# Metadata service URL for IAM token retrieval (inside Yandex Cloud Functions)
-METADATA_URL = 'http://169.254.169.254/computeMetadata/v1/instance/service-accounts/default/token'
 
 # Yandex Cloud Logging API base URL
 API_BASE = 'https://logging.api.cloud.yandex.net/logging/v1'
@@ -28,101 +24,54 @@ class AuthError(YcLoggingError):
     """Authentication-related errors."""
 
 
+class IamTokenAuth:
+    """Provides an IAM token from the YC_IAM_TOKEN environment variable.
+
+    Caches the token and handles refresh on expiry.
+    """
+
+    def __init__(self) -> None:
+        self._token: str | None = None
+        self._expiry: datetime | None = None
+
+    def get_token(self) -> str:
+        """Return a valid IAM token, reading from env var if needed."""
+        if self._token and self._expiry and datetime.now(timezone.utc) < self._expiry:
+            return self._token
+
+        token = os.environ.get('YC_IAM_TOKEN')
+        if not token:
+            raise AuthError(
+                'YC_IAM_TOKEN environment variable is not set. ' 'Obtain a token via YC CLI: yc iam create-token'
+            )
+
+        self._token = token
+        # IAM tokens are valid for 12h, refresh after 11h
+        self._expiry = datetime.now(timezone.utc) + timedelta(hours=11)
+        return self._token
+
+    def invalidate(self) -> None:
+        """Force token refresh on next call."""
+        self._token = None
+        self._expiry = None
+
+
 class YcLoggingClient:
     """Client for Yandex Cloud Logging REST API.
 
-    Authentication priority:
-    1. YC_IAM_TOKEN env var (explicit IAM token)
-    2. YC_SERVICE_ACCOUNT_JSON env var (service account key, generates IAM token)
-    3. Metadata service (when running inside Yandex Cloud Functions)
+    Uses IamTokenAuth for authentication via the YC_IAM_TOKEN env var.
     """
 
-    def __init__(self, folder_id: str | None = None) -> None:
+    def __init__(self, folder_id: str | None = None, auth: IamTokenAuth | None = None) -> None:
         self._folder_id = folder_id or os.environ.get('YC_FOLDER_ID', '')
-        self._iam_token: str | None = None
-        self._token_expiry: datetime | None = None
+        self._auth = auth or IamTokenAuth()
         self._http = httpx.Client(timeout=30.0)
 
-    # ── Authentication ──────────────────────────────────────────────
-
-    def _get_iam_token(self) -> str:
-        """Obtain IAM token using the best available method."""
-        # 1. Explicit IAM token
-        token = os.environ.get('YC_IAM_TOKEN')
-        if token:
-            return token
-
-        # 2. Service account key (JSON)
-        sa_json = os.environ.get('YC_SERVICE_ACCOUNT_JSON')
-        if sa_json:
-            return self._exchange_sa_key(sa_json)
-
-        # 3. Metadata service (inside Yandex Cloud)
-        if self._is_in_yc():
-            return self._get_token_from_metadata()
-
-        raise AuthError(
-            'No Yandex Cloud credentials found. '
-            'Set YC_IAM_TOKEN or YC_SERVICE_ACCOUNT_JSON env var, '
-            'or run inside Yandex Cloud Functions.'
-        )
-
-    @staticmethod
-    def _is_in_yc() -> bool:
-        return bool(os.environ.get('YC_FUNCTION_ID') or os.environ.get('REMOTE_EXECUTION'))
-
-    def _get_token_from_metadata(self) -> str:
-        try:
-            resp = self._http.get(
-                METADATA_URL,
-                headers={'Metadata-Flavor': 'Google'},
-                timeout=5,
-            )
-            resp.raise_for_status()
-            data = resp.json()
-            return data['access_token']
-        except Exception as exc:
-            raise AuthError(f'Failed to get IAM token from metadata: {exc}') from exc
-
-    def _exchange_sa_key(self, sa_json: str) -> str:
-        """Exchange a service account key for an IAM token.
-
-        Uses the standard Yandex Cloud IAM JWT authentication flow.
-        For simplicity, this reads the API key directly.
-        """
-        try:
-            key_data = json.loads(sa_json)
-            api_key = key_data.get('api_key') or key_data.get('service_account_id', '')
-            if not api_key:
-                raise AuthError('Service account JSON must contain "api_key" or "service_account_id"')
-            return self._get_iam_token_from_api_key(api_key)
-        except json.JSONDecodeError:
-            # Maybe it's just an API key, try directly
-            return self._get_iam_token_from_api_key(sa_json)
-
-    def _get_iam_token_from_api_key(self, api_key: str) -> str:
-        """Convert Yandex Cloud API key to an IAM token."""
-        resp = self._http.post(
-            'https://iam.api.cloud.yandex.net/iam/v1/tokens',
-            json={'yandexPassportOauthToken': api_key},
-        )
-        resp.raise_for_status()
-        data = resp.json()
-        return data['iamToken']
-
-    def _ensure_token(self) -> str:
-        """Get a valid IAM token, refreshing if needed."""
-        if self._iam_token and self._token_expiry and datetime.now(timezone.utc) < self._token_expiry:
-            return self._iam_token
-
-        self._iam_token = self._get_iam_token()
-        # IAM tokens are valid for 12h, refresh after 11h
-        self._token_expiry = datetime.now(timezone.utc) + timedelta(hours=11)
-        return self._iam_token
+    # ── Internal HTTP ───────────────────────────────────────────────
 
     def _request(self, method: str, path: str, **kwargs: Any) -> dict:
         """Make an authenticated request to the YC Logging API."""
-        token = self._ensure_token()
+        token = self._auth.get_token()
         url = f'{API_BASE}/{path.lstrip("/")}'
 
         headers = kwargs.pop('headers', {})
@@ -133,9 +82,8 @@ class YcLoggingClient:
 
         if resp.status_code == 401:
             # Token expired, force refresh and retry once
-            self._iam_token = None
-            self._token_expiry = None
-            token = self._ensure_token()
+            self._auth.invalidate()
+            token = self._auth.get_token()
             headers['Authorization'] = f'Bearer {token}'
             resp = self._http.request(method, url, headers=headers, **kwargs)
 
@@ -189,7 +137,6 @@ class YcLoggingClient:
             'sinceTime': since_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
             'untilTime': until_time.strftime('%Y-%m-%dT%H:%M:%SZ'),
         }
-
         if page_token:
             body['pageToken'] = page_token
 
@@ -259,4 +206,5 @@ class YcLoggingClient:
         )
 
     def close(self) -> None:
+        """Close the underlying HTTP client."""
         self._http.close()
