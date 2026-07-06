@@ -24,7 +24,7 @@ setup_logging(__package__)
 
 DATETIME_FORMAT = '%Y-%m-%dT%H:%M:%S+00:00'
 USELESS_FOLDERS = {84, 113, 112, 270, 86, 87, 88, 165, 365, 89, 172, 91, 90, 316, 234, 230, 319}
-WORKERS_COUNT = 6
+WORKERS_COUNT = 2
 
 
 class DBClient:
