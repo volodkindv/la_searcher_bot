@@ -42,8 +42,28 @@ def _make_geo_folder_with_view_support(
     ``geo_folders_view`` does a LEFT JOIN with ``geo_divisions`` to compute
     ``folder_display_name``.  Without a matching division the view returns
     NULL, which breaks callers that expect a string (e.g. ``get_geo_folders()``).
+
+    If a GeoFolder with the requested ``folder_id`` already exists (leftover
+    from a previous test run), reuses the existing row to avoid
+    ``UniqueViolation``.
     """
-    folder = db_factories.GeoFolderFactory.create_sync(**kwargs)
+    # Remove any leftover GeoFolder with the same folder_id to prevent
+    # UniqueViolation from test data that wasn't cleaned up between sessions.
+    cleanup_fid = kwargs.get('folder_id')
+    if cleanup_fid is not None:
+        session.query(db_models.GeoFolder).filter(
+            db_models.GeoFolder.folder_id == cleanup_fid,
+        ).delete()
+        session.commit()
+
+    try:
+        folder = db_factories.GeoFolderFactory.create_sync(**kwargs)
+    except sqlalchemy.exc.IntegrityError:
+        # Factory-generated folder_id collided with leftover data
+        # (no explicit folder_id was passed).  Try with a high value.
+        kwargs['folder_id'] = fake.pyint(min_value=100_000, max_value=999_999)
+        folder = db_factories.GeoFolderFactory.create_sync(**kwargs)
+
     if 'division_id' not in kwargs or kwargs.get('division_id') is not None:
         try:
             div = db_models.GeoDivision(

@@ -20,6 +20,9 @@ from check_topics_by_upd_time._legacy.main import (
     process_folder,
     save_root_timestamps,
 )
+from check_topics_by_upd_time._legacy.main import (
+    main as legacy_main,
+)
 
 pytestmark = pytest.mark.xdist_group('legacy_db')
 
@@ -276,8 +279,6 @@ class TestMainRootTimestampSave:
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.return_value = []
 
-        from check_topics_by_upd_time._legacy.main import main as legacy_main
-
         legacy_main({}, None)
 
         mock_save.assert_called_once_with([('1', 'ts1')])
@@ -295,8 +296,6 @@ class TestMainRootTimestampSave:
     ):
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.side_effect = RuntimeError('traversal failed')
-
-        from check_topics_by_upd_time._legacy.main import main as legacy_main
 
         with pytest.raises(RuntimeError):
             legacy_main({}, None)
@@ -316,8 +315,6 @@ class TestMainRootTimestampSave:
     ):
         mock_get_roots.return_value = []
 
-        from check_topics_by_upd_time._legacy.main import main as legacy_main
-
         legacy_main({}, None)
 
         mock_get_updates.assert_not_called()
@@ -336,8 +333,6 @@ class TestMainRootTimestampSave:
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.return_value = [('1', 'folder1')]
 
-        from check_topics_by_upd_time._legacy.main import main as legacy_main
-
         legacy_main({}, None)
 
         mock_pubsub.assert_called_once_with([('1', 'folder1')])
@@ -353,8 +348,6 @@ class TestMainRootTimestampSave:
     ):
         mock_get_roots.return_value = [('1', 'ts1')]
         mock_get_updates.return_value = []
-
-        from check_topics_by_upd_time._legacy.main import main as legacy_main
 
         legacy_main({}, None)
 
