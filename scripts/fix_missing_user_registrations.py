@@ -198,14 +198,9 @@ def main(dry_run: bool, dsn: str | None) -> None:
         datefmt='%Y-%m-%d %H:%M:%S',
     )
 
-    if dsn:
-        engine = sqlalchemy.create_engine(dsn)
-        with engine.begin() as conn:
-            _run(conn, dry_run)
-    else:
-        pool = sqlalchemy_get_pool()
-        with pool.begin() as conn:
-            _run(conn, dry_run)
+    engine = sqlalchemy.create_engine(dsn) if dsn else sqlalchemy_get_pool()
+    with engine.begin() as conn:
+        _run(conn, dry_run)
 
 
 def _run(conn: Any, dry_run: bool) -> None:
