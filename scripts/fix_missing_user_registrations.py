@@ -12,9 +12,8 @@ in the ``users`` table.
 This script:
 1. Finds all ``user_id`` values that exist in any settings table but are
    missing from ``users``.
-2. For each such user, creates a minimal record in ``users``,
-   ``user_identity_map``, ``user_onboarding``, ``user_preferences``, and
-   ``user_pref_topic_type`` (default topic types).
+2. For each such user, creates a minimal record in ``users`` and
+   ``user_identity_map``.
 
 Usage
 -----
@@ -62,9 +61,6 @@ SETTINGS_TABLES = [
     'user_forum_attributes',
     'user_roles',
     'user_stat',
-    'dialogs',
-    'communications_last_inline_msg',
-    'notif_by_user',
 ]
 
 
@@ -156,9 +152,10 @@ def register_orphan_user(
 ) -> None:
     """Create a minimal user record for an orphan user_id.
 
-    This mirrors ``register_new_user()`` + ``register_vk_only_user()`` but
-    without the ``ON CONFLICT DO NOTHING`` guard — we already know the user
-    doesn't exist.
+    Only inserts into ``users`` and ``user_identity_map`` — the bare minimum
+    needed so that the user exists in the system. Other tables (preferences,
+    onboarding, topic types, status history) are intentionally skipped; they
+    will be populated naturally when the user interacts with the bot.
     """
     # 1. Insert into users
     conn.execute(
@@ -187,59 +184,6 @@ def register_orphan_user(
             'messenger': messenger.value,
             'messenger_user_id': str(user_id),
         },
-    )
-
-    # 3. Insert onboarding start
-    conn.execute(
-        sqlalchemy.text("""
-            INSERT INTO user_onboarding (user_id, step_id, step_name, timestamp)
-            VALUES (:user_id, :step_id, :step_name, :timestamp)
-            ON CONFLICT DO NOTHING
-        """),
-        {'user_id': user_id, 'step_id': 0, 'step_name': 'start', 'timestamp': now},
-    )
-
-    # 4. Insert default notification preferences (if not already there)
-    default_prefs = [
-        (user_id, 'new_searches', 0),
-        (user_id, 'status_changes', 1),
-        (user_id, 'inforg_comments', 4),
-        (user_id, 'first_post_changes', 8),
-        (user_id, 'bot_news', 20),
-    ]
-    for uid, pref, pref_id in default_prefs:
-        conn.execute(
-            sqlalchemy.text("""
-                INSERT INTO user_preferences (user_id, preference, pref_id)
-                VALUES (:user_id, :preference, :pref_id)
-                ON CONFLICT (user_id, pref_id) DO NOTHING
-            """),
-            {'user_id': uid, 'preference': pref, 'pref_id': pref_id},
-        )
-
-    # 5. Insert default topic types (if not already there)
-    default_topic_types = [
-        (user_id, 0, 'search_works'),
-        (user_id, 1, 'info_search'),
-    ]
-    for uid, type_id, type_name in default_topic_types:
-        conn.execute(
-            sqlalchemy.text("""
-                INSERT INTO user_pref_topic_type (user_id, topic_type_id, topic_type_name, timestamp)
-                VALUES (:user_id, :topic_type_id, :topic_type_name, :timestamp)
-                ON CONFLICT (user_id, topic_type_id) DO NOTHING
-            """),
-            {'user_id': uid, 'topic_type_id': type_id, 'topic_type_name': type_name, 'timestamp': now},
-        )
-
-    # 6. Insert user_statuses_history
-    conn.execute(
-        sqlalchemy.text("""
-            INSERT INTO user_statuses_history (status, date, user_id)
-            VALUES (:status, :date, :user_id)
-            ON CONFLICT (user_id, date) DO NOTHING
-        """),
-        {'status': 'new', 'date': now, 'user_id': user_id},
     )
 
 
