@@ -25,9 +25,6 @@ Apply fixes::
 
     PYTHONPATH=src uv run python scripts/fix_missing_user_registrations.py
 
-Run with a custom DSN (default: from ``AppConfig`` env vars)::
-
-    PYTHONPATH=src uv run python scripts/fix_missing_user_registrations.py --dsn=postgresql://user:pass@host:5432/db
 """
 
 from __future__ import annotations
@@ -40,6 +37,8 @@ from typing import Any
 import click
 import sqlalchemy
 
+from dotenv import load_dotenv
+assert load_dotenv('.env', override=True)
 from _dependencies.common.commons import Messenger, sqlalchemy_get_pool
 
 logger = logging.getLogger(__name__)
@@ -79,15 +78,15 @@ def find_orphan_user_ids(conn: Any) -> set[int]:
             logger.warning('Could not read table %s: %s', table, exc)
 
     # Also check user_identity_map (uses internal_user_id, not user_id)
-    try:
-        rows = conn.execute(
-            sqlalchemy.text(
-                'SELECT DISTINCT internal_user_id FROM user_identity_map WHERE internal_user_id IS NOT NULL'
-            )
-        ).fetchall()
-        all_user_ids.update(row[0] for row in rows)
-    except Exception as exc:
-        logger.warning('Could not read table user_identity_map: %s', exc)
+    # try:
+    #     rows = conn.execute(
+    #         sqlalchemy.text(
+    #             'SELECT DISTINCT internal_user_id FROM user_identity_map WHERE internal_user_id IS NOT NULL'
+    #         )
+    #     ).fetchall()
+    #     all_user_ids.update(row[0] for row in rows)
+    # except Exception as exc:
+    #     logger.warning('Could not read table user_identity_map: %s', exc)
 
     try:
         rows = conn.execute(sqlalchemy.text('SELECT user_id FROM users WHERE user_id IS NOT NULL')).fetchall()
@@ -189,8 +188,7 @@ def register_orphan_user(
 
 @click.command()
 @click.option('--dry-run', is_flag=True, help='Only print what would be done, do not modify the database.')
-@click.option('--dsn', default=None, help='PostgreSQL DSN (default: from AppConfig environment variables).')
-def main(dry_run: bool, dsn: str | None) -> None:
+def main(dry_run: bool) -> None:
     """Find and fix users who have settings but no record in the users table."""
     logging.basicConfig(
         level=logging.INFO,
@@ -198,7 +196,7 @@ def main(dry_run: bool, dsn: str | None) -> None:
         datefmt='%Y-%m-%d %H:%M:%S',
     )
 
-    engine = sqlalchemy.create_engine(dsn) if dsn else sqlalchemy_get_pool()
+    engine = sqlalchemy_get_pool()
     with engine.begin() as conn:
         _run(conn, dry_run)
 
@@ -239,9 +237,9 @@ def _run(conn: Any, dry_run: bool) -> None:
             ', '.join(tables_found),
         )
 
-        if not dry_run:
-            register_orphan_user(conn, uid, messenger, username, now)
-            logger.info('    → Registered user_id=%s', uid)
+        # if not dry_run:
+        #     register_orphan_user(conn, uid, messenger, username, now)
+        #     logger.info('    → Registered user_id=%s', uid)
 
     if dry_run:
         logger.info('Dry-run complete. Use --dry-run to preview, omit to apply.')

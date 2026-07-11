@@ -18,6 +18,7 @@ dependencies = [
     "python-json-logger>=3.3.0",
     "yarl>=1.18.3",
     "vk-api>=11.10.0",
+    "dotenv>=0.9.9",
 ]
 [dependency-groups]
 
