@@ -195,7 +195,7 @@ def settings_menu_intro() -> str:
 def reset_settings_confirm() -> str:
     """Confirmation prompt before resetting all settings to defaults."""
     return (
-        'Точно снести все настройки на дефолт?\n\n'
+        'Точно сбросить настройки?\n\n'
         'Будут удалены: регионы, домашние координаты, радиус, возрастные группы, '
         'отслеживание поисков. Уведомления и виды поисков вернутся к стандартным.\n\n'
         'Роль и привязка аккаунтов не изменятся.'
@@ -205,7 +205,7 @@ def reset_settings_confirm() -> str:
 def reset_settings_done() -> str:
     """Message after settings were reset to defaults."""
     return (
-        'Готово, все настройки сброшены на дефолт.\n\n'
+        'Готово, все настройки сброшены.\n\n'
         'Регион теперь не выбран — выберите его заново, чтобы получать уведомления.'
     )
 

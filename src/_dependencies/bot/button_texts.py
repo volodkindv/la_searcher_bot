@@ -23,6 +23,6 @@ class ButtonTexts:
     BTN_COORDS_DELETE: str = 'удалить "домашние координаты"'
 
     # Reset settings
-    BTN_RESET_SETTINGS: str = 'снести все настройки на дефолт'
-    BTN_RESET_CONFIRM: str = 'да, снести настройки'
+    BTN_RESET_SETTINGS: str = 'Сбросить настройки'
+    BTN_RESET_CONFIRM: str = 'Да, сбросить'
     BTN_RESET_KEEP: str = 'нет, оставить как есть'

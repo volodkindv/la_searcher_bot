@@ -96,11 +96,11 @@ class MainSettingsMenu(str, ExtendedEnum):
     b_set_forum_nick = 'связать аккаунты бота и форума'
     b_set_vkontakte_nick = 'связать аккаунты бота и VKontakte'
     b_set_topic_type = 'настроить вид поисков'
-    b_reset_settings = 'снести все настройки на дефолт'
+    b_reset_settings = 'Сбросить настройки'
 
 
 class ResetSettingsConfirm(str, ExtendedEnum):
-    b_reset_confirm = 'да, снести настройки'
+    b_reset_confirm = 'Да, сбросить'
     b_reset_cancel = 'нет, оставить как есть'
 
 

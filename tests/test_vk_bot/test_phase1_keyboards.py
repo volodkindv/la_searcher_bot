@@ -123,7 +123,7 @@ class TestVKKeyboardPresets:
         assert labels[1] == 'настроить "домашние координаты"'
         assert labels[2] == 'настроить максимальный радиус'
         assert labels[3] == 'полностью отключить уведомления'
-        assert labels[4] == 'снести все настройки на дефолт'
+        assert labels[4] == 'Сбросить настройки'
         assert labels[5] == 'в начало'
 
     def test_settings_menu_for_unsubscribed_user(self):

@@ -139,7 +139,7 @@ def handle_radius_disable(ctx: VKHandlerContext) -> None:
 
 @vk_handle(text=VKKeyboardButtons.BTN_RESET_SETTINGS)
 def handle_reset_settings(ctx: VKHandlerContext) -> None:
-    """Handle 'снести все настройки на дефолт' button — show confirmation."""
+    """Handle 'Сбросить настройки' button — show confirmation."""
     ctx.reply(
         text=reset_settings_confirm(),
         keyboard=VKKeyboardPresets.reset_confirm(),

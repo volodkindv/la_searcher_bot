@@ -496,9 +496,9 @@ def handle_enable_notifications(ctx: TGHandlerContext) -> None:
 
 @tg_handle(text=MainSettingsMenu.b_reset_settings)
 def handle_reset_settings_confirm_prompt(ctx: TGHandlerContext) -> None:
-    """Show confirmation before wiping all settings to defaults."""
+    """Show confirmation before resetting settings to defaults."""
     bot_message = (
-        'Точно снести все настройки на дефолт?\n\n'
+        'Точно сбросить настройки?\n\n'
         'Будут удалены: регионы, домашние координаты, радиус, возрастные группы, '
         'отслеживание поисков. Уведомления и виды поисков вернутся к стандартным.\n\n'
         'Роль и привязка аккаунтов не изменятся.'
@@ -509,10 +509,10 @@ def handle_reset_settings_confirm_prompt(ctx: TGHandlerContext) -> None:
 
 @tg_handle(text=ResetSettingsConfirm.b_reset_confirm)
 def handle_reset_settings_confirm(ctx: TGHandlerContext) -> None:
-    """Wipe settings, restore defaults, then prompt region re-selection."""
+    """Reset settings to defaults, then prompt region re-selection."""
     ctx.db.reset_user_settings(ctx.user_id)
     bot_message = (
-        'Готово, все настройки сброшены на дефолт.\n\n'
+        'Готово, все настройки сброшены.\n\n'
         'Регион теперь не выбран — настройте его заново, чтобы получать уведомления.'
     )
     keyboard = [b_menu_set_region, b_back_to_start]
