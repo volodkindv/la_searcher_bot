@@ -363,7 +363,12 @@ def handle_view_searches(ctx: TGHandlerContext) -> None:
         Commands.c_view_latest_searches: SearchListType.ALL,
         Commands.c_view_act_searches: SearchListType.ACTIVE,
     }
-    search_list_type = temp_dict[ctx.update_params.got_message]
+    # Диспетчер матчит хендлер по lowercased-тексту (см. _run_handlers), а
+    # got_message здесь — как пришло от пользователя. Пользователь может ввести
+    # команду в любом регистре (напр. "/VIEW_ACT_SEARCHES" или «Посмотреть
+    # Актуальные Поиски») — нормализуем ключ, иначе KeyError → хендлер падает →
+    # диспетчер уходит в fallback «не понимаю такой команды».
+    search_list_type = temp_dict[ctx.update_params.got_message.strip().lower()]
 
     use_experimental_view = ctx.db.get_search_follow_mode(ctx.user_id) and (ctx.db.is_user_tester(ctx.user_id))
     if use_experimental_view:

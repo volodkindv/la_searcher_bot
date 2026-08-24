@@ -170,3 +170,34 @@ def test_view_searches_text_does_not_trigger_unknown_command_fallback(monkeypatc
     sent_messages = [call.args[1].text for call in tg_api_mock.send_message.call_args_list]
     assert sent_messages, 'список поисков должен быть отправлен'
     assert all('не понимаю такой команды' not in message for message in sent_messages)
+
+
+@pytest.mark.parametrize(
+    'raw_text',
+    [
+        'ПОСМОТРЕТЬ АКТУАЛЬНЫЕ ПОИСКИ',
+        '/View_Act_Searches',
+        '  /view_act_searches  ',
+        'Посмотреть Последние Поиски',
+    ],
+)
+def test_handle_view_searches_case_insensitive_lookup(raw_text: str):
+    """Commands in any case must not crash with KeyError.
+
+    The dispatcher matches handlers on lowercased text, but the handler used
+    to look up the search-list type with the RAW got_message — a user typing
+    "/VIEW_ACT_SEARCHES" or capitalizing the phrase would get KeyError,
+    the handler would crash and the dispatcher would fall through to
+    «не понимаю такой команды». The lookup key must be normalized.
+    """
+    ctx = TGHandlerContext(
+        update_params=_make_update_params(text=raw_text),
+        extra_params=MagicMock(),
+        db=_make_db_mock(),
+        tg_api=MagicMock(),
+    )
+
+    consumed = main._run_registered_handlers(ctx, text=raw_text.strip().lower())
+
+    assert consumed is True
+    assert ctx.is_consumed
