@@ -71,6 +71,16 @@ class TGHandlerContext:
         """
         return self._consumed
 
+    def mark_consumed(self) -> None:
+        """Mark the context as consumed without sending a message.
+
+        Use when a handler already sent all its responses via ``.send_message()``
+        (which does NOT mark the context as consumed by design) and wants to
+        stop the handler chain so the dispatcher does not fall through to the
+        «не понимаю такой команды» fallback.
+        """
+        self._consumed = True
+
     # ── Response methods ───────────────────────────────────────────────
 
     def reply(
