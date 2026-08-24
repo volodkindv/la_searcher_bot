@@ -11,8 +11,8 @@ Covers the shared ``SettingsResetMixin`` exposed via ``UserRepository``:
 
 from random import randint
 
-import sqlalchemy
 import pytest
+import sqlalchemy
 
 from _dependencies.user_repository import UserRepository
 
@@ -42,25 +42,27 @@ def _seed_user_with_full_settings(pool, user_id: int, role: str = 'member') -> N
     with pool.begin() as conn:
         conn.execute(
             sqlalchemy.text(
-                "INSERT INTO users (user_id, internal_user_id, role) "
-                "VALUES (:uid, :iid, :role) ON CONFLICT (user_id) DO UPDATE SET role=:role"
+                'INSERT INTO users (user_id, internal_user_id, role) '
+                'VALUES (:uid, :iid, :role) ON CONFLICT (user_id) DO UPDATE SET role=:role'
             ),
             {'uid': user_id, 'iid': user_id, 'role': role},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_preferences (user_id, preference, pref_id) VALUES (:u, 'comments_changes', 3)"),
+            sqlalchemy.text(
+                "INSERT INTO user_preferences (user_id, preference, pref_id) VALUES (:u, 'comments_changes', 3)"
+            ),
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_pref_age (user_id, period_min, period_max) VALUES (:u, 0, 10)"),
+            sqlalchemy.text('INSERT INTO user_pref_age (user_id, period_min, period_max) VALUES (:u, 0, 10)'),
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_pref_topic_type (user_id, topic_type_id) VALUES (:u, 1)"),
+            sqlalchemy.text('INSERT INTO user_pref_topic_type (user_id, topic_type_id) VALUES (:u, 1)'),
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_pref_radius (user_id, radius) VALUES (:u, 150)"),
+            sqlalchemy.text('INSERT INTO user_pref_radius (user_id, radius) VALUES (:u, 150)'),
             {'u': user_id},
         )
         conn.execute(
@@ -68,19 +70,21 @@ def _seed_user_with_full_settings(pool, user_id: int, role: str = 'member') -> N
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_regional_preferences (user_id, forum_folder_num) VALUES (:u, 42)"),
+            sqlalchemy.text('INSERT INTO user_regional_preferences (user_id, forum_folder_num) VALUES (:u, 42)'),
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_pref_region (user_id, region_id) VALUES (:u, 42)"),
+            sqlalchemy.text('INSERT INTO user_pref_region (user_id, region_id) VALUES (:u, 42)'),
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_pref_search_whitelist (user_id, search_id) VALUES (:u, 123)"),
+            sqlalchemy.text('INSERT INTO user_pref_search_whitelist (user_id, search_id) VALUES (:u, 123)'),
             {'u': user_id},
         )
         conn.execute(
-            sqlalchemy.text("INSERT INTO user_forum_attributes (user_id, forum_username, status) VALUES (:u, 'nick', 'verified')"),
+            sqlalchemy.text(
+                "INSERT INTO user_forum_attributes (user_id, forum_username, status) VALUES (:u, 'nick', 'verified')"
+            ),
             {'u': user_id},
         )
         conn.execute(
@@ -103,9 +107,7 @@ def _seed_user_with_full_settings(pool, user_id: int, role: str = 'member') -> N
 
 def _count(pool, table: str, user_id: int) -> int:
     with pool.begin() as conn:
-        return conn.execute(
-            sqlalchemy.text(f'SELECT count(*) FROM {table} WHERE user_id=:u'), {'u': user_id}
-        ).scalar()
+        return conn.execute(sqlalchemy.text(f'SELECT count(*) FROM {table} WHERE user_id=:u'), {'u': user_id}).scalar()
 
 
 def _pref_names(pool, user_id: int) -> set[str]:
@@ -126,16 +128,12 @@ def _topic_type_ids(pool, user_id: int) -> set[int]:
 
 def _user_role(pool, user_id: int) -> str | None:
     with pool.begin() as conn:
-        return conn.execute(
-            sqlalchemy.text('SELECT role FROM users WHERE user_id=:u'), {'u': user_id}
-        ).scalar()
+        return conn.execute(sqlalchemy.text('SELECT role FROM users WHERE user_id=:u'), {'u': user_id}).scalar()
 
 
 def _user_status(pool, user_id: int) -> str | None:
     with pool.begin() as conn:
-        return conn.execute(
-            sqlalchemy.text('SELECT status FROM users WHERE user_id=:u'), {'u': user_id}
-        ).scalar()
+        return conn.execute(sqlalchemy.text('SELECT status FROM users WHERE user_id=:u'), {'u': user_id}).scalar()
 
 
 def _max_onboarding_step(pool, user_id: int) -> int | None:

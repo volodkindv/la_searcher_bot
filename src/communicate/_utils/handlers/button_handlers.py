@@ -512,8 +512,7 @@ def handle_reset_settings_confirm(ctx: TGHandlerContext) -> None:
     """Reset settings to defaults, then prompt region re-selection."""
     ctx.db.reset_user_settings(ctx.user_id)
     bot_message = (
-        'Готово, все настройки сброшены.\n\n'
-        'Регион теперь не выбран — настройте его заново, чтобы получать уведомления.'
+        'Готово, все настройки сброшены.\n\nРегион теперь не выбран — настройте его заново, чтобы получать уведомления.'
     )
     keyboard = [b_menu_set_region, b_back_to_start]
     ctx.reply(text=bot_message, reply_markup=create_one_column_reply_markup(keyboard))
