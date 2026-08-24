@@ -370,3 +370,8 @@ def handle_view_searches(ctx: TGHandlerContext) -> None:
         _handle_view_searches_experimental_view(ctx, search_list_type)
     else:
         _handle_view_searches_usual_view(ctx, search_list_type)
+
+    # Ответы уходят через ctx.send_message()/ctx.tg_api.send_message(), которые
+    # НЕ помечают контекст consumed. Без явной пометки диспетчер считает, что
+    # хендлер не сработал, и падает в fallback «не понимаю такой команды».
+    ctx.mark_consumed()
