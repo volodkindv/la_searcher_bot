@@ -29,7 +29,7 @@ precommit: lint mypy
 
 ci-test:
 	# docker compose run --build --rm bot make initdb
-	docker compose run --rm bot make test
+	docker compose -f docker-compose.yml -f docker-compose.ci.yml run --rm bot make test
 
 dependencies:
 	echo "Copy common code to deploy Google Cloud Functions"
