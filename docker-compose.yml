@@ -19,6 +19,7 @@ services:
   postgres:
     env_file: *env_file
     image: postgres:15-alpine
+    command: ["postgres", "-c", "fsync=off"]
     volumes:
       - pg_data:/var/lib/postgresql/data
     ports:
