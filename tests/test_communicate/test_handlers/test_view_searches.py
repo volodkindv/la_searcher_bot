@@ -197,8 +197,7 @@ def test_handle_view_searches_always_uses_inline_view():
     db_mock.get_search_follow_mode.assert_not_called()
     db_mock.is_user_tester.assert_not_called()
     inline_sent = any(
-        isinstance(call.args[1].reply_markup, InlineKeyboardMarkup)
-        for call in tg_api_mock.send_message.call_args_list
+        isinstance(call.args[1].reply_markup, InlineKeyboardMarkup) for call in tg_api_mock.send_message.call_args_list
     )
     assert inline_sent, 'список поисков должен уходить inline-клавиатурой'
 
